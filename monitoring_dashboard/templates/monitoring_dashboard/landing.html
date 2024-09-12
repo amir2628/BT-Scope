@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scope</title>
+    <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <img src="{% static 'images/bt.png' %}" alt="tbs Logo">
+            <h1>Добро пожаловать на платформу автоматизации</h1>
+        </header>
+        
+        <div class="image-container">
+            <img class="station-image station1" src="{% static 'images/station1.png' %}" alt="Station1"/>
+            <img class="station-image station2" src="{% static 'images/station3.png' %}" alt="Station3"/>
+        </div>
+
+        <div class="description">
+            Откройте передовые решения, которые помогут вам автоматизировать и оптимизировать ваши бизнес-процессы, обеспечивая эффективность и инновации на каждом этапе.
+        </div>
+
+        <div class="login">
+            <a href="/login" class="enter-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 40 27" class="arrow">
+                    <line stroke-width="2" stroke="white" y2="14" x2="40" y1="14" x1="1"></line>
+                    <line stroke-width="2" stroke="white" y2="1.41537" x2="10.4324" y1="14.2433" x1="1.18869"></line>
+                    <line stroke-width="2" stroke="white" y2="13.6007" x2="1.20055" y1="26.2411" x1="10.699"></line>
+                    <line stroke="white" y2="14.3133" x2="1.07325" y1="13.6334" x1="0.33996"></line>
+                    <line stroke-width="2" stroke="white" y2="13" x2="39" y1="8" x1="39"></line>
+                </svg>
+                ЗАЙТИ
+            </a>
+        </div>
+    </div>
+</body>
+</html>

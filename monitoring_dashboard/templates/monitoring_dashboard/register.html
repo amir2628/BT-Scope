@@ -1,0 +1,56 @@
+<!-- Change it to include the role in the form -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="shortcut icon" href="{%  static 'images/favicon.ico' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Зарегистрировать</title>
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="login-section">
+            <form method="POST">
+                <h2>Register</h2>
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Логин:</label>
+                    {{ form.username }}
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    {{ form.password }}
+                </div>
+                <div class="form-group">
+                    <label for="email">Адрес электронной почты:</label>
+                    {{ form.email }}
+                </div>
+                <div class="form-group">
+                    <label for="first_name">Имя:</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="form-group">
+                    <label for="middle_name">Отчество:</label>
+                    {{ form.middle_name }}
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Фамилия:</label>
+                    {{ form.last_name }}
+                </div>
+                <div class="form-group">
+                    <label for="position">Должность:</label>
+                    {{ form.position }}
+                </div>
+                <div class="form-group">
+                    <label for="role">Role:</label>
+                    {{ form.role }}
+                </div>
+                <button type="submit">Зарегистрировать</button>
+                <button type="button" onclick="window.location.href='/login/'">Возвращаться</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

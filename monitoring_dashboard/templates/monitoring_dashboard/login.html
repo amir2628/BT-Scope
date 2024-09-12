@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scope</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="login-section active">
+            <form id="login-form" method="POST" action="/login/">
+                <img src="{% static 'images/bt.png' %}" style="-webkit-filter: drop-shadow(5px 5px 2px #222); filter: drop-shadow(5px 5px 2px #222);" alt="tbs Logo">
+                {% csrf_token %}
+                <h2>Зайти в Систему</h2>
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <div class="checkbox-container">
+                    <input type="checkbox" name="remember_me" id="remember_me">
+                    <label for="remember_me">Запомни меня</label>
+                </div>
+                <a href="#" id="forgot-password">Забыли пароль?</a>
+                <button type="submit">Зайти в Систему</button>
+                <div class="or">— Или —</div>
+                <button type="button" id="register">Создать учетную запись</button>
+                <button type="button" id="homeButton">Вернуться на главную страницу</button>
+                <button type="button" id="toggle-qr">Войдите в систему с помощью QR-кода</button>
+            </form>
+        </div>
+        <div class="qr-section">
+            <h2>Отсканируйте QR-код</h2>
+            <video id="video" width="500" height="400" style="border: 1px solid black;"></video>
+            <canvas id="canvas" width="500" height="400" style="display:none;"></canvas>
+            <div>
+                <label for="qr-result">Отсканированный QR-код:</label>
+                <input type="text" id="qr-result" readonly>
+            </div>
+            <button type="button" id="toggle-login">Вернуться к входу в систему</button>
+        </div>
+    </div>
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-modal">&times;</span>
+            <h2>Забыли пароль</h2>
+            <p>Введите свой адрес электронной почты ниже, чтобы получить ссылку для сброса пароля.</p>
+            <form id="forgot-password-form">
+                <input type="email" id="email" placeholder="Your email address" required>
+                <button type="submit">Отправить ссылку для сброса</button>
+            </form>
+            <p id="response-message"></p>
+        </div>
+    </div>
+    <script src="{% static 'js/jsQR.js' %}"></script>
+    <script src="{% static 'js/login.js' %}"></script>
+    <script>
+
+        const loginSection = document.querySelector('.login-section');
+        const qrSection = document.querySelector('.qr-section');
+        const toggleQRButton = document.getElementById('toggle-qr');
+        const toggleLoginButton = document.getElementById('toggle-login');
+        const video = document.getElementById("video");
+        const canvasElement = document.getElementById("canvas");
+        const canvas = canvasElement.getContext("2d");
+        const qrResult = document.getElementById("qr-result");
+
+        toggleQRButton.addEventListener('click', function() {
+            loginSection.classList.remove('active');
+            loginSection.classList.add('inactive');
+            qrSection.classList.remove('inactive');
+            qrSection.classList.add('active');
+            setTimeout(function() {
+                loginSection.style.display = 'none';
+                qrSection.style.display = 'flex';
+                startVideo();
+            }, 500);
+        });
+
+        toggleLoginButton.addEventListener('click', function() {
+            qrSection.classList.remove('active');
+            qrSection.classList.add('inactive');
+            loginSection.classList.remove('inactive');
+            loginSection.classList.add('active');
+            setTimeout(function() {
+                qrSection.style.display = 'none';
+                loginSection.style.display = 'flex';
+                stopVideo();
+            }, 500);
+        });
+
+        // Function to start the video stream
+        function startVideo() {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+                    video.play();
+                    requestAnimationFrame(tick);
+                })
+                .catch(function(error) {
+                    console.error("Error accessing the camera: ", error);
+                });
+        }
+
+        // Function to stop the video stream
+        function stopVideo() {
+            if (video.srcObject) {
+                const stream = video.srcObject;
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
+            }
+        }
+
+        function drawLine(begin, end, color) {
+            canvas.beginPath();
+            canvas.moveTo(begin.x, begin.y);
+            canvas.lineTo(end.x, end.y);
+            canvas.lineWidth = 4;
+            canvas.strokeStyle = color;
+            canvas.stroke();
+        }
+
+        function tick() {
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvasElement.hidden = false;
+                canvasElement.height = video.videoHeight;
+                canvasElement.width = video.videoWidth;
+                canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+                const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+                if (code) {
+                    drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
+                    drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
+                    drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
+                    drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+                    qrResult.value = code.data;
+                    window.location.href = `/qr_login/?operator_id=${code.data}`;
+                }
+            }
+            requestAnimationFrame(tick);
+        }
+    </script>
+</body>
+</html>

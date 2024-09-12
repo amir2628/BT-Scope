@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scope</title>
+    <link rel="stylesheet" href="{% static 'css/cnc.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/bootstrap-table.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/bootstrap-table.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/bootstrap-table.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/locale/bootstrap-table-zh-CN.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="{% static 'images/bt.png' %}" alt="tbs Logo">
+            <h2>ООО «Станкозавод «ТБС»</h2>
+        </div>
+        <ul>
+            <li><a href="{% url 'inventory' %}">Склад</a></li>
+            <li ><a href="{% url 'planning' %}">Планирование</a></li>
+            <li><a href="{% url 'shifts_page' %}">Смены</a></li>
+            <li class="active"><a href="{% url 'cnc_planning' %}">Очередь с ЧПУ</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="privacy">
+                <p>© 2024 ООО «Станкозавод «ТБС»</p>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <header>
+            <h1>С возвращением, {{ user.first_name }}!</h1>
+            <div class="header-right">
+                <div class="notification-container">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-count">0</span>
+                    <div class="notification-dropdown">
+                        <h3>Уведомления</h3>
+                        <div class="notifications-list"></div>
+                    </div>
+                </div>
+                <div class="profile">
+                    <span>{{ user.first_name }} {{ user.middle_name }} {{ user.last_name }}</span>
+                    <img src="{% static 'images/profile-pic.jpg' %}" alt="Profile Picture">
+                    <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button class="logout-button">Выйти</button>
+                    </form>
+                </div>
+            </div>
+            <script>
+                const userId = {{ request.user.id }};
+            </script>
+        </header>
+        <div class="content">
+            {% block content %}
+            <div class="dashboard">
+                <!-- <div class="animated-border-box-glow"></div> -->
+                {% for machine in cnc_machines %}
+                <div class="card idle" id="cnc{{ machine.id }}" data-id="{{ machine.id }}">
+                    <div class="loader" data-status="inactive">
+                        <span></span>
+                    </div>
+                    <h2>{{ machine.name }}</h2>
+                    {% if machine.image %}
+                        <img src="{{ machine.image.url }}" alt="{{ machine.name }}">
+                    {% else %}
+                        <img src="{% static 'images/default-cnc-image.png' %}" alt="Default Image">
+                    {% endif %}
+                    <div class="status" id="cnc{{ machine.id }}_status">Загрузка статуса...</div>
+                    <div class="control-mode" id="cnc{{ machine.id }}_controlMode">Загрузка режима управления...</div>
+                    <div class="tool-num" id="cnc{{ machine.id }}_toolNum">Загрузка номера инструмента...</div>
+                    <div class="bar"></div>
+                    <div class="circle" data-percent="{{ machine.percent }}">
+                        <span class="parts" id="cnc{{ machine.id }}_parts">Загрузка деталей...</span>
+                        <span class="alarm_all" id="cnc{{ machine.id }}_alarm_all">Загрузка сигналов тревоги...</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endblock %}
+
+            
+            <div id="cutommodal" class="cutommodal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2 id="modal-title">CNC Machine Details</h2>
+                    <p id="modal-text">Some text about the CNC machine...</p>
+                    <div id="modal-links"></div> <!-- This will contain the file links -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="tooltip"></div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/cnc.js' %}"></script>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/bootstrap-table.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/bootstrap-table-locale-all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/extensions/export/bootstrap-table-export.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.29.0/tableExport.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+        
+        <script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Add click event listener to all CNC cards
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', () => {
+            const machineId = card.getAttribute('data-id');
+            fetchScheduleDetails(machineId);
+        });
+    });
+
+    // Add click event listener to close the modal
+    document.querySelector('.cutommodal .close').addEventListener('click', () => {
+        closeModal();
+    });
+
+    // Click outside the modal to close it
+    window.addEventListener('click', (event) => {
+        if (event.target === document.getElementById('cutommodal')) {
+            closeModal();
+        }
+    });
+});
+
+function closeModal() {
+    const modal = document.getElementById('cutommodal');
+    modal.style.opacity = 0;
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300); // Match the duration of the fade-out transition
+}
+
+function fetchScheduleDetails(machineId) {
+    fetch(`/get-schedules-for-machine/${machineId}/`)
+        .then(response => response.json())
+        .then(data => {
+            const modal = document.getElementById('cutommodal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalText = document.getElementById('modal-text');
+
+            if (data.success && data.schedules.length > 0) {
+                const cncMachine = data.schedules[0].cncMachine;
+                modalTitle.textContent = `Очередь ЧПУ «${cncMachine}»`;
+                modalText.innerHTML = '';  // Clear previous text
+
+                // Sort schedules: urgent first
+                const sortedSchedules = data.schedules.sort((a, b) => b.urgent - a.urgent);
+
+                sortedSchedules.forEach(schedule => {
+                    const scheduleContainer = document.createElement('div');
+                    scheduleContainer.style.marginBottom = '20px';
+                    scheduleContainer.style.padding = '15px';
+                    scheduleContainer.style.borderRadius = '10px';
+                    scheduleContainer.style.background = 'rgba(58, 55, 55, 0.2)';
+                    scheduleContainer.style.border = '1px solid rgba(255, 255, 255, 0.3)';
+                    scheduleContainer.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+                    scheduleContainer.style.position = 'relative'; // For absolute positioning of icon
+
+                    if (schedule.urgent) {
+                        scheduleContainer.classList.add('schedule-urgent');
+                        const urgentContainer = document.createElement('div');
+                        urgentContainer.className = 'urgent-icon'; // Class to apply styles
+
+                        const urgentText = document.createElement('span');
+                        urgentText.className = 'urgent-text';
+                        urgentText.textContent = 'Срочно!';
+                        urgentText.style.fontSize = '20px';
+
+                        const urgentIcon = document.createElement('i');
+                        urgentIcon.className = 'fas fa-bell';
+
+                        urgentContainer.appendChild(urgentText);
+                        urgentContainer.appendChild(urgentIcon);
+                        scheduleContainer.appendChild(urgentContainer);
+                    }
+
+                    scheduleContainer.innerHTML += `
+                        <i class="fa fa-check-square" aria-hidden="true" style="color: green; font-size: 20px; ${schedule.finished ? 'display: inline;' : 'display: none;'} margin-left: 10px;" data-schedule-id="${schedule.id}"></i><br>
+                        <strong>Тип продукта:</strong> <span class="highlight">${schedule.productType}</span><br>
+                        <strong>Номер заказа:</strong> <span class="highlight">${schedule.orderNum}</span><br>
+                        <strong>ЛИМЦ:</strong> <span class="highlight">${schedule.limtz}</span><br>
+                        <strong>Количество:</strong> <span class="highlight">${schedule.quantity}</span><br>
+                        <strong>Дата начала:</strong> <span class="highlight">${schedule.startDate}</span><br>
+                        <strong>Дата окончания:</strong> <span class="highlight">${schedule.endDate}</span><br>
+                        <strong>Имя оператора:</strong> <span class="highlight">${schedule.operatorName}</span><br>
+                        <strong>Станок с ЧПУ:</strong> <span class="highlight">${schedule.cncMachine}</span><br>
+                    `;
+
+                    const filesList = document.createElement('div');
+                    filesList.className = 'file-links';
+                    if (schedule.files && schedule.files.length > 0) {
+                        schedule.files.forEach(file => {
+                            const fileName = decodeURIComponent(file.url.split('/').pop());
+
+                            const fileContainer = document.createElement('div');
+                            fileContainer.style.display = 'flex';
+                            fileContainer.style.justifyContent = 'space-between';
+                            fileContainer.style.alignItems = 'center';
+                            fileContainer.style.marginBottom = '10px';
+
+                            const link = document.createElement('a');
+                            link.href = file.url;
+                            link.target = '_blank';
+                            link.innerText = `Просмотреть файл -- ${fileName}`;
+                            console.log('here is the file name:', fileName)
+                            link.style.color = '#1e90ff';
+                            link.style.textDecoration = 'none';
+                            link.style.flexGrow = 1;
+                            link.style.marginRight = '10px';
+                            link.style.transition = 'color 0.3s ease';
+
+                            const downloadButton = document.createElement('button');
+                            downloadButton.innerText = 'Скачать';
+                            downloadButton.style.backgroundColor = '#6a994e';
+                            downloadButton.style.color = '#fff';
+                            downloadButton.style.border = 'none';
+                            downloadButton.style.borderRadius = '5px';
+                            downloadButton.style.padding = '8px 15px';
+                            downloadButton.style.cursor = 'pointer';
+                            downloadButton.style.transition = 'background-color 0.3s ease';
+                            downloadButton.onclick = () => {
+                                window.location.href = file.url;
+                                console.log('here is the file URL: ', file.url)
+                            };
+
+                            link.onmouseover = () => link.style.color = '#1c86ee';
+                            link.onmouseout = () => link.style.color = '#1e90ff';
+                            downloadButton.onmouseover = () => downloadButton.style.backgroundColor = '#1c86ee';
+                            downloadButton.onmouseout = () => downloadButton.style.backgroundColor = '#1e90ff';
+
+                            fileContainer.appendChild(link);
+                            fileContainer.appendChild(downloadButton);
+                            filesList.appendChild(fileContainer);
+                        });
+                    } else {
+                        filesList.innerHTML = '<p>По этому расписанию файлы не загружались.</p>';
+                    }
+                            // <i class="fa fa-pause-circle" aria-hidden="true" style="font-size: 18px; color: #c5d86d; font-family: "Rubik Mono One", monospace;" ${(!schedule.finished && schedule.paused) ? 'display: inline;' : 'display: none;'} margin-left: 10px;" data-schedule-id="${schedule.id}"> График приостановлен. Пожалуйста, нажмите на кнопку возобновить, чтобы продолжить</i>
+                    scheduleContainer.appendChild(filesList);
+                    console.log("Here is the schedules: ", schedule)
+
+                    // Add the buttons, timer, and comments field for each schedule
+                    scheduleContainer.innerHTML += `
+                        <div class="schedule-controls" data-schedule-id="${schedule.id}">
+                            <i class="fa fa-pause-circle" aria-hidden="true" style="font-size: 18px; color: #c5d86d; font-family: 'Rubik Mono One', monospace; display: ${!schedule.finished && schedule.paused ? 'inline' : 'none'}; margin-left: 10px;" data-schedule-id="${schedule.id}">
+                                График приостановлен. Пожалуйста, нажмите на кнопку возобновить, чтобы продолжить
+                            </i>
+
+                            <div class="controls-row">
+                                <div class="flip-timer" id="timer-${schedule.id}"></div>
+                                <button class="start-work-btn" data-schedule-id="${schedule.id}" ${schedule.finished || schedule.start_time ? 'disabled' : ''}><i class="fa fa-power-off" aria-hidden="true"></i> Начать</button>
+                                <button class="end-shift-btn" data-schedule-id="${schedule.id}" ${schedule.finished ? 'disabled' : ''}><i class="fa fa-pause-circle" aria-hidden="true"></i> Пауза</button>
+                                <button class="resume-work-btn" data-schedule-id="${schedule.id}" ${schedule.finished ? 'disabled' : ''}><i class="fa fa-play-circle" aria-hidden="true"></i> возобновить</button>
+                            </div>
+                            <div class="details-row">
+                                <div class="input-group">
+                                    <label for="details-quantity-${schedule.id}">Количество деталей:</label>
+                                    <input type="number" id="details-quantity-${schedule.id}" class="details-quantity-input" data-schedule-id="${schedule.id}" value="${schedule.detailsQuantity || ''}" />
+                                </div>
+                                <div class="input-group">
+                                    <label for="details-time-${schedule.id}">Время на деталь (в мин):</label>
+                                    <input type="number" id="details-time-${schedule.id}" class="details-time-input" data-schedule-id="${schedule.id}" value="${schedule.detailsTime || ''}" />
+                                </div>
+                            </div>
+                            <div class="comment-section">
+                                <input type="text" class="comments-input" placeholder="Add comments" data-schedule-id="${schedule.id}">
+                                <button class="send-comment-btn" data-schedule-id="${schedule.id}">
+                                    <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <div class="controls-row">
+                                <button class="finish-work-btn" data-schedule-id="${schedule.id}" ${schedule.finished ? 'disabled' : ''}><i class="fa fa-flag-checkered" aria-hidden="true"></i> Закончить работу</button>
+                                <i class="fa fa-check-square" aria-hidden="true" style="color: green; font-size: 20px; ${schedule.finished ? 'display: inline;' : 'display: none;'} margin-left: 10px;" data-schedule-id="${schedule.id}"></i>
+                            </div>
+                        </div>
+                    `;
+
+                    modalText.appendChild(scheduleContainer);
+                    modalText.appendChild(document.createElement('hr'));  // Separator for schedules
+                });
+
+                modal.style.display = 'block';
+                setTimeout(() => {
+                    modal.style.opacity = 1;
+                }, 10);
+            } else {
+                modalTitle.textContent = 'График не найден';
+                modalText.textContent = 'Подробная информация о Графике работы данного станка с ЧПУ отсутствует.';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching schedule details:', error);
+        });
+}
+
+let startTimes = {};
+let timerIntervals = {};
+
+document.body.addEventListener('click', function(event) {
+    const scheduleId = event.target.getAttribute('data-schedule-id');
+
+    if (event.target.classList.contains('start-work-btn')) {
+        startWork(scheduleId);
+    } else if (event.target.classList.contains('finish-work-btn')) {
+        const comments = document.querySelector(`.comments-input[data-schedule-id="${scheduleId}"]`).value;
+        finishWork(scheduleId, comments);
+    } else if (event.target.classList.contains('end-shift-btn')) {
+        endShift(scheduleId);
+    } else if (event.target.classList.contains('resume-work-btn')) {
+        resumeWork(scheduleId);
+    }
+});
+
+
+
+function startWork(scheduleId) {
+    // Send POST request to register the start time
+    fetch("/start-work/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({ schedule_id: scheduleId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Successfully registered start time, initialize timer
+            startTimes[scheduleId] = new Date(); // Assuming this is your current start time
+            startTimer(scheduleId);
+            
+            // Disable the Start Work button
+            const startWorkButton = document.querySelector(`.start-work-btn[data-schedule-id="${scheduleId}"]`);
+            if (startWorkButton) {
+                startWorkButton.disabled = true;
+            }
+        } else {
+            console.error('Failed to start work.');
+        }
+    })
+    .catch(error => {
+        console.error('Error starting work:', error);
+    });
+}
+
+
+
+function startTimer(scheduleId) {
+    const timerElement = document.getElementById(`timer-${scheduleId}`);
+    const startTime = startTimes[scheduleId];
+
+    timerIntervals[scheduleId] = setInterval(() => {
+        const elapsedTime = new Date() - startTime;
+        const minutes = Math.floor((elapsedTime / (1000 * 60)) % 60);
+        const hours = Math.floor((elapsedTime / (1000 * 60 * 60)) % 24);
+        const days = Math.floor(elapsedTime / (1000 * 60 * 60 * 24));
+
+        timerElement.innerHTML = `
+            <div class="timer-segment">
+                <span class="timer-value">${days.toString().padStart(2, '0')}</span>
+                <span class="timer-label">дней</span>
+            </div>
+            <div class="timer-segment">
+                <span class="timer-value">${hours.toString().padStart(2, '0')}</span>
+                <span class="timer-label">часов</span>
+            </div>
+            <div class="timer-segment">
+                <span class="timer-value">${minutes.toString().padStart(2, '0')}</span>
+                <span class="timer-label">минут</span>
+            </div>
+        `;
+    }, 1000);
+}
+
+function finishWork(scheduleId, comments) {
+    const elapsedTimeMillis = new Date() - startTimes[scheduleId];
+    const elapsedTimeMinutes = Math.floor(elapsedTimeMillis / (1000 * 60));
+    const detailsQuantity = document.querySelector(`#details-quantity-${scheduleId}`).value;
+    const detailsTime = document.querySelector(`#details-time-${scheduleId}`).value;
+
+    fetch("/finish-work/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({ schedule_id: scheduleId, comments: comments, elapsed_time: elapsedTimeMinutes, details_quantity: detailsQuantity, details_time: detailsTime })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            clearInterval(timerIntervals[scheduleId]);
+            document.querySelector(`.finish-work-btn[data-schedule-id="${scheduleId}"]`).disabled = true;
+            const checkmark = document.querySelector(`i[data-schedule-id="${scheduleId}"]`);
+            checkmark.style.display = 'inline';
+        }
+    })
+    .catch(error => {
+        console.error('Error finishing work:', error);
+    });
+}
+
+function endShift(scheduleId) {
+    const elapsedTimeMillis = new Date() - startTimes[scheduleId];
+    const elapsedTimeMinutes = Math.floor(elapsedTimeMillis / (1000 * 60));
+
+    fetch("/end-shift/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({ schedule_id: scheduleId, elapsed_time: elapsedTimeMinutes })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            clearInterval(timerIntervals[scheduleId]);
+            document.querySelector(`.end-shift-btn[data-schedule-id="${scheduleId}"]`).disabled = true;
+            document.querySelector(`.resume-work-btn[data-schedule-id="${scheduleId}"]`).disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error ending shift:', error);
+    });
+}
+
+
+function resumeWork(scheduleId) {
+    // Step 1: Fetch saved timer data
+    fetch(`/get-schedule-details-Timer-elapsed/${scheduleId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Step 2: Calculate the start time and update the timer
+                const savedElapsedTime = data.elapsed_time * 60000; // Convert minutes to milliseconds
+                const startTime = new Date(Date.now() - savedElapsedTime);
+                startTimes[scheduleId] = startTime;
+                startTimer(scheduleId);
+
+                // Enable the "End Shift" button and disable the "Resume Work" button
+                document.querySelector(`.end-shift-btn[data-schedule-id="${scheduleId}"]`).disabled = false;
+                document.querySelector(`.resume-work-btn[data-schedule-id="${scheduleId}"]`).disabled = true;
+
+                // Step 3: Send POST request to update is_paused status
+                fetch("/resume-work/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie("csrftoken")
+                    },
+                    body: JSON.stringify({ schedule_id: scheduleId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        console.error('Error updating is_paused status:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending resume-work request:', error);
+                });
+            } else {
+                console.error('Error fetching timer data:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching schedule details:', error);
+        });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+        </script>
+  
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    // Create a translation map for English to Russian
+                    const translationMap = {
+                        'ACTIVE': 'АКТИВНЫЙ',
+                        'READY': 'ГОТОВО',
+                        'INACTIVE': 'НЕАКТИВНЫЙ',
+                        'Fault': 'Ошибка',
+                        'FEED_HOLD': 'Удержание подачи',
+                        'Edit': 'Редактирование',
+                        'AUTOMATIC': 'АВТОМАТИЧЕСКИЙ',
+                        'OPTIONAL_STOP': 'M01 Пауза',
+                        'MANUAL': 'Ручной',
+                        'MANUAL_DATA_INPUT': 'РУЧНОЙ ВВОД ДАННЫХ'
+
+                    };
+            
+                    function fetchMachineStatus(machineId) {
+                        if (machineId === 7) {
+                            fetch(`/get-machine-status/${machineId}/`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    const statusElement = document.getElementById(`cnc${machineId}_status`);
+                                    const partsElement = document.getElementById(`cnc${machineId}_parts`);
+                                    const alarmAllElement = document.getElementById(`cnc${machineId}_alarm_all`);
+                                    const controlMode = document.getElementById(`cnc${machineId}_controlMode`);
+                                    const toolNum = document.getElementById(`cnc${machineId}_toolNum`);
+                                    const loader = document.querySelector(`#cnc${machineId} .loader`);
+
+            
+                                    if (data.f_sim_p1_ctl_exec) {
+                                        // Translate status using the translation map
+                                        const translatedStatus = translationMap[data.f_sim_p1_ctl_exec] || data.f_sim_p1_ctl_exec;
+                                        const translatedControlMode = translationMap[data.f_sim_p1_ctl_mode] || data.f_sim_p1_ctl_mode;
+                                        // statusElement.innerText = `Состояние ЧПУ: ${translatedStatus}`;
+                                        statusElement.innerText = translatedStatus;
+                                        // controlMode.innerText = `Режим управления: ${translatedControlMode}`;
+                                        controlMode.innerText = translatedControlMode;
+                                        toolNum.innerText = `Номер инструмента: ${data.f_sim_p1_tool_num}`;
+                                        partsElement.innerText = `Всего деталей: ${data.f_sim_p1_part_count}`;
+                                        const translatedAlarm_all = translationMap[data.f_sim_p1_alm_all] || data.f_sim_p1_alm_all
+                                        alarmAllElement.innerText = `сигнализация: ${translatedAlarm_all}`;
+                                        // console.log("here is the part count: ", data.f_sim_p1_alm);
+            
+                                        // Update loader color based on original status
+                                        if (data.f_sim_p1_ctl_exec === 'ACTIVE') {
+                                            loader.setAttribute('data-status', 'active');
+                                        } else if (data.f_sim_p1_ctl_exec === 'READY') {
+                                            loader.setAttribute('data-status', 'ready');
+                                        } else if (data.f_sim_p1_ctl_exec === 'OPTIONAL_STOP'){
+                                            loader.setAttribute('data-status', 'pause');
+                                        } else {
+                                            loader.setAttribute('data-status', 'inactive');
+                                        }
+                                    } else {
+                                        console.error('Failed to retrieve machine status:', data.error);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching machine status:', error);
+                                });
+                        }
+                    }
+            
+                    function startPollingForMachine7() {
+                        const machineId = 7;
+                        fetchMachineStatus(machineId);
+                        setInterval(() => fetchMachineStatus(machineId), 1000);
+                    }
+            
+                    startPollingForMachine7();
+                });
+            </script>             
+</body>
+</html>

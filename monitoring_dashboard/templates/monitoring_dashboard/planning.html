@@ -1,0 +1,930 @@
+<!-- monitoring_dashboard/templates/monitoring_dashboard/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="shortcut icon" href="{%  static 'images/favicon.ico' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scope</title>
+    <link rel="stylesheet" href="{% static 'css/planning.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/bootstrap-table.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/bootstrap-table.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/bootstrap-table.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/locale/bootstrap-table-zh-CN.min.js"></script>
+
+    <!-- table filter control resources -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    
+
+</head>
+<body>
+    <div class="loader" id="loader"></div>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="{% static 'images/bt.png' %}" alt="tbs Logo">
+            <h2>ООО «Станкозавод «ТБС»</h2>
+        </div>
+        <ul>
+            <li><a href="{% url 'inventory' %}">Склад</a></li>
+            <li class="active"><a href="{% url 'planning' %}">Планирование</a></li>
+            <li><a href="{% url 'shifts_page' %}">Смены</a></li>
+            <li><a href="{% url 'cnc_planning' %}">Очередь с ЧПУ</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="privacy">
+                <p>© 2024 ООО «Станкозавод «ТБС»</p>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <header>
+            <h1>С возвращением, {{ user.first_name }}!</h1>
+            <div class="profile">
+                <span>{{ user.first_name }} {{ user.middle_name }} {{ user.last_name }}</span>
+                <img src="{% static 'images/profile-pic.jpg' %}" alt="Profile Picture">
+                <!-- Logout button -->
+                <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button class="logout-button">Выйти</button>
+                </form>
+            </div>
+        </header>
+        <div class="content">
+            <div class="calendar-container">
+                <h1>График Производства</h1>
+                <div class="controls" style="display: flex; justify-content: space-between; align-items: center;">
+                    <!-- Left side controls -->
+                    <div class="left-controls" style="display: flex; gap: 10px;">
+                        <select class="ctrl-slct" id="monthSelect" style="width: 200px;"></select>
+                        <select class="ctrl-slct" id="yearSelect" style="width: 100px;"></select>
+                        <div tabindex="0" class="plusButton" id="todayButton">
+                            <i class="fa fa-calendar-check plusIcon" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Right side controls -->
+                    <div class="right-controls" style="display: flex; gap: 10px;">
+                        <div tabindex="0" class="plusButton" id="editScheduleButton">
+                            <i class="fa fa-plus plusIcon" aria-hidden="true"></i>
+                        </div>
+                        <div tabindex="0" class="plusButton" id="openDeleteFormButton">
+                            <i class="fa fa-trash plusIcon" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <table id="calendar">
+                    <thead>
+                        <tr>
+                            <th>Вс.</th>
+                            <th>Пн.</th>
+                            <th>Вт.</th>
+                            <th>Ср.</th>
+                            <th>Чт.</th>
+                            <th>Пт.</th>
+                            <th>Сб.</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Deletion modal form -->
+            <div id="deleteModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <form id="deleteForm">
+                        <div class="form-group">
+                            <label for="deleteId">Введите идентификатор расписания для удаления:</label>
+                            <input type="number" id="deleteId" name="deleteId" required>
+                        </div>
+                        <div id="scheduleDetails"></div>
+                        <button type="submit" id="confirmDeleteButton">Удалить</button>
+                    </form>
+                    <div id="confirmationMessage" style="display: none;">
+                        <p id="deleteDetails"></p>
+                        <button id="confirmYes">Да</button>
+                        <button id="confirmNo">Нет</button>
+                    </div>
+                </div>
+            </div>
+            <!-- modal for adding new schedule through the plus button over the clendar for the CNC schedule -->
+            <div id="modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="btn-close" id="closeAddSchedule" data-dismiss="modal" aria-label="Close">X</button>
+                        <h5 class="modal-title">Добавить График оператора</h5>
+                    </div>
+                    <form id="scheduleForm" class="scheduleForm1">
+                        <div class="form-group">
+                        <label for="date">Дата начала:</label>
+                            <input type="date" id="date" name="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">Дата окончания:</label>
+                            <input type="date" id="endDate" name="endDate" required>
+                        </div>
+                        <div class="form-group">
+                        <label for="productType">Тип продукта:</label>
+                        <input type="text" id="productType" name="productType" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity">Количество:</label>
+                            <input type="number" id="quantity" name="quantity" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="orderNum">Номер заказа:</label>
+                            <input type="text" id="orderNum" name="orderNum" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="limtz">ЛИМЦ:</label>
+                            <input type="text" id="limtz" name="limtz" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">Комментарий от OTK:</label>
+                            <input type="text" id="comment" name="comment" required>
+                        </div>
+                        <div class="form-group">
+                        <label for="operatorName">Полное имя оператора:</label>
+                        <input type="text" id="operatorName" name="operatorName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="operatorName">Оператор:</label>
+                            <select id="operatorSelect" name="operatorName" required>
+                                <!-- Options will be populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                        <label for="cncMachine">Станок с ЧПУ:</label>
+                        <select id="cncMachine" name="cncMachine" required>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                        <input type="file" name="files" multiple> <!-- Multiple files -->
+                        </div>
+                        <div class="form-group-row">
+                            <div class="urgent-label">
+                                <label for="urgent">Срочно?</label>
+                            </div>
+                            <!-- <input type="checkbox" id="urgent" name="urgent"> -->
+
+                            <div class="urgent-check">
+                                <input type="checkbox" class="checkbox" id="urgent" name="urgent">
+                            </div>
+                        </div>
+
+                        
+                        <button class="submit-form" type="submit">Добавить</button>
+                    </form>
+                </div>
+            </div>
+            <div class="inventory-overview">
+                
+
+                <div class="control-buttons">
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link tab-button active" data-tab="production_plan_bt" onclick="loadTableData('Production_Plan_BT')">
+                                <i class="fa fa-table" aria-hidden="true"></i> План производства БТ</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link tab-button" data-tab="production_plan_tbs" onclick="loadTableData('Production_Plan_TBS')">
+                                <i class="fa fa-table" aria-hidden="true"></i> План производства ТБС</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link tab-button" data-tab="production_plan_ovk" onclick="loadTableData('Production_Plan_OVK')">
+                                <i class="fa fa-table" aria-hidden="true"></i> План производства ОВК</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link tab-button" data-tab="Schedule4" onclick="loadTableData('schedule4')">
+                                <i class="fa fa-table" aria-hidden="true"></i> Другие Графики</button>
+                        </li>
+                        
+                        </ul>
+                </div>
+
+                <div class="material-inventory">
+                    <div class="tab-content">
+
+                        <div tabindex="0" class="plusButton" id="openFormButton">
+                            <i class="fa fa-plus plusIcon" aria-hidden="true"></i>
+                        </div>
+
+
+                        <div tabindex="0" class="plusButton" id="edit-btn">
+                            <i class="fa fa-pencil plusIcon" aria-hidden="true"></i>
+                        </div>
+
+                        <div tabindex="0" class="plusButton" id="delete-from-db">
+                            <i class="fa fa-trash plusIcon" aria-hidden="true"></i>
+                        </div>
+
+                        <div id="toolbar">
+                        </div>
+                    </div>
+
+                    <table 
+                        id="table"
+                        class="planning-table"
+                        data-toolbar="#toolbar"
+                        data-search="true"
+                        data-show-refresh="true"
+                        data-show-toggle="true"
+                        data-show-fullscreen="true"
+                        data-show-columns="true"
+                        data-show-columns-toggle-all="true"
+                        data-detail-view="false"
+                        data-show-export="true"
+                        data-click-to-select="true"
+                        data-detail-formatter="detailFormatter"
+                        data-minimum-count-columns="2"
+                        data-show-pagination-switch="true"
+                        data-pagination="true"
+                        data-filter-control="true"
+                        data-show-search-clear-button="true"
+                        data-id-field="id"
+                        data-page-list="[10, 25, 50, 100, all]"
+                        data-show-footer="false"
+                        data-response-handler="responseHandler">
+                
+                    <thead class="table-header">
+                        <tr>
+                        <th>details</th>
+                        <th data-field="operate">ОПЕРАЦИИ</th>
+                        <th data-field="up_num">УП №</th>
+                        <th data-field="date">Дата</th>
+                        <th data-field="order">Заказ</th>
+                        <th data-field="name">НАЗВАНИЕ</th>
+                        <th data-field="limtz">ЛИМЦ</th>
+                        <th data-field="order_priority">Приоритет заказа</th>
+                        <th data-field="smz_chpu">СМЗ→ЧПУ шт</th>
+                        <th data-field="chpu_smz">ЧПУ→СМЗ шт</th>
+                        <th data-field="shipment">Отгрузка(СМЗ) УП № и Дата</th>
+                        <th data-field="operations">ОПЕРАЦИИ</th>
+                        <th data-field="time_for_piece">ВРЕМЯ на ШТ</th>
+                        <th data-field="time_for_batch">Время на ПАРТИЮ</th>
+                        <th data-field="planned_date_readiness">Планируемая дата готовности</th>
+                        <th data-field="ovk_manufacturing">ОВК Изготовление</th>
+                        <th data-field="comments">Комментарии</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in production_plan_bt %}
+                        <tr>
+                        <td class="bs-checkbox"><input data-index="0" name="btSelectItem" type="checkbox"></td>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.up_num }}</td>
+                        <td>{{ item.date }}</td>
+                        <td>{{ item.order }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.limtz }}</td>
+                        <td>{{ item.order_priority }}</td>
+                        <td>{{ item.smz_chpu }}</td>
+                        <td>{{ item.chpu_smz }}</td>
+                        <td>{{ item.shipment }}</td>
+                        <td>{{ item.operations }}</td>
+                        <td>{{ item.time_for_piece }}</td>
+                        <td>{{ item.time_for_batch }}</td>
+                        <td>{{ item.planned_date_readiness }}</td>
+                        <td>{{ item.ovk_manufacturing }}</td>
+                        <td>{{ item.comments }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>
+                </div>
+                <!-- Modal Structure for adding new data to the DBs -->
+                <div id="dynamicFormModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <form id="dynamicForm">
+                            <!-- Dynamic form fields will be inserted here -->
+                        </form>
+                        <button type="submit" form="dynamicForm" class="btn btn-primary">Представить</button>
+                    </div>
+                </div>
+
+                <!-- Modal for adding a new schedule -->
+                <div id="addScheduleModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <span class="close" id="close-add-schedule-modal">&times;</span>
+                            <h2>Add New Schedule</h2>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addScheduleForm">
+                                <div class="form-group">
+                                    <label for="schedule-name">Schedule Name</label>
+                                    <input type="text" id="schedule-name" name="schedule_name" class="form-control" required>
+                                </div>
+                                <div id="columns-container">
+                                    <div class="form-group">
+                                        <label for="column-name-1">Column Name</label>
+                                        <input type="text" id="column-name-1" name="columns[]" class="form-control" required>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="add-column-button">Add Another Column</button>
+                            <button type="submit">Submit</button>
+                        </div>
+                        <!-- </form> -->
+                    </div>
+                </div>
+
+                <!-- Modal for editing the tables -->
+                <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editModalLabel">Edit Entry</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="editForm">
+                                    <!-- Fields will be dynamically added here -->
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрывать</button>
+                                <button type="submit" class="btn btn-primary" id="saveChangesBtn">Сохранить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Modal for showing details of each calendar cell -->
+                <div id="detailsModal" class="custom-details-modal">
+                    <div class="custom-details-modal-content">
+                        <span class="close">&times;</span>
+                        <h2>Детали графика</h2>
+                        <div id="eventDetails" class="event-details">
+                            <!-- Details will be populated here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cnc-schedule-table">
+                <h2>График работы станков с ЧПУ</h2>
+                <!-- This is the tbale to show the schedule that we add in the calendar -->
+                <table 
+                id="scheduleTable" class="table cncscheduleTable"
+                data-search="true"
+                data-show-refresh="true"
+                data-show-toggle="true"
+                data-show-fullscreen="true"
+                data-show-columns="true"
+                data-show-columns-toggle-all="true"
+                data-detail-view="false"
+                data-show-export="true"
+                data-click-to-select="true"
+                data-detail-formatter="detailFormatter"
+                data-minimum-count-columns="2"
+                data-show-pagination-switch="true"
+                data-pagination="true"
+                data-filter-control="true"
+                data-show-search-clear-button="true"
+                data-id-field="id"
+                data-page-list="[5, 10, 25, 50, 100, all]"
+                data-show-footer="false"
+                data-response-handler="responseHandler">
+                    <thead>
+                        <tr>
+                            <th data-field="id">ID</th>
+                            <th data-field="startDate">Start Date</th>
+                            <th data-field="endDate">End Date</th>
+                            <th data-field="productType">Product Type</th>
+                            <th data-field="quantity">Quantity</th>
+                            <th data-field="operatorName">Operator Name</th>
+                            <th data-field="cncMachineName">CNC Machine</th>
+                            <th data-field="urgent">Urgent</th>
+                            <th data-field="actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Rows will be added dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Edit Schedule in the table taht shows details from the calendar Modal -->
+            <!-- Modal -->
+            <div class="modal fade" id="uniqueEditModal" tabindex="-1" role="dialog" aria-labelledby="uniqueEditModalTitle" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h5 class="modal-title" id="uniqueEditModalTitle">Редактировать График</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        </div>
+                        <div class="modal-body">
+                        <form id="uniqueEditForm">
+                            <div class="form-group">
+                            <label for="uniqueEditStartDate">Дата начала:</label>
+                            <input type="text" class="form-control" id="uniqueEditStartDate" name="startDate">
+                            </div>
+                            <div class="form-group">
+                            <label for="uniqueEditEndDate">Дата окончания:</label>
+                            <input type="text" class="form-control" id="uniqueEditEndDate" name="endDate">
+                            </div>
+                            <div class="form-group">
+                            <label for="uniqueEditProductType">Тип продукта:</label>
+                            <input type="text" class="form-control" id="uniqueEditProductType" name="productType">
+                            </div>
+                            <div class="form-group">
+                            <label for="uniqueEditQuantity">Количество:</label>
+                            <input type="text" class="form-control" id="uniqueEditQuantity" name="quantity">
+                            </div>
+                            <div class="form-group">
+                                <label for="uniqueEditOrderNum">Номер заказа:</label>
+                                <input type="text" class="form-control" id="uniqueEditOrderNum" name="orderNum">
+                            </div>
+                            <div class="form-group">
+                                <label for="uniqueEditLimtz">ЛИМЦ:</label>
+                                <input type="text" class="form-control" id="uniqueEditLimtz" name="limtz">
+                            </div>
+                            <div class="form-group">
+                                <label for="uniqueEditComment">Комментарий от OTK:</label>
+                                <input type="text" class="form-control" id="uniqueEditComment" name="comment">
+                            </div>
+                            <div class="form-group">
+                            <label for="uniqueEditOperatorName">Оператор:</label>
+                            <select class="form-control" id="uniqueEditOperatorName" name="operatorName"></select>
+                            </div>
+                            <div class="form-group">
+                            <label for="uniqueEditCncMachineName">Станок с ЧПУ:</label>
+                            <select class="form-control" id="uniqueEditCncMachineName" name="cncMachineName"></select>
+                            </div>
+                            <div class="form-group">
+                                <!-- File upload input field -->
+                                <input type="file" name="files" id="uniqueEditFiles" multiple> <!-- Multiple files -->
+
+                                <!-- Div to show already uploaded files -->
+                                <div id="uploadedFilesList"></div>
+
+                                <div class="form-group-row">
+                                    <div class="urgent-label">
+                                        <label for="urgent">Срочно?</label>
+                                    </div>
+                                    <!-- <input type="checkbox" id="urgent" name="urgent"> -->
+
+                                    <div class="urgent-check">
+                                        <input type="checkbox" class="checkbox" id="uniqueEditUrgent" name="urgent">
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Сохранить</button>
+                        </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="tooltip"></div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/planning.js' %}"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Table JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/bootstrap-table.min.js"></script>
+    <!-- Bootstrap Table Extensions -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/bootstrap-table-locale-all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/extensions/export/bootstrap-table-export.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.29.0/tableExport.min.js"></script>
+    <!-- Add Bootstrap Table extensions -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.22.6/locale/bootstrap-table-ru-RU.min.js" integrity="sha512-zaQQ43bp3CBBQUpdqzE5nuLAseVYHdiSY7aaRopq/PyuCHd4LsV949JnrPCztc+Ny8opz5sQpOCNeHhkt+DmqA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+      
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        // Get references to the modal and form elements
+        const formModal = document.getElementById('dynamicFormModal');
+        const form = document.getElementById('dynamicForm');
+        const openFormButton = document.getElementById('openFormButton');
+        const spanClose = formModal.querySelector('.close');
+        const closeModalAddSchedule = document.getElementById('closeAddSchedule')
+        const modalAddSchedule = document.getElementById('modal')
+
+        // Function to show the modal
+        function showModal() {
+            formModal.style.display = 'block';
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            formModal.style.display = 'none';
+        }
+
+        // Event listener to open the form modal
+        openFormButton.addEventListener('click', function () {
+            // Clear previous form fields
+            form.innerHTML = '';
+
+            // Get the active table headers
+            const activeTable = document.querySelector('.tab-button.active').getAttribute('data-tab');
+            const columns = getColumns(activeTable);
+
+            // Generate form fields based on table headers
+            columns.forEach(column => {
+                if (column.field !== 'checkbox') { // Skip the checkbox field
+                    const formGroup = document.createElement('div');
+                    formGroup.classList.add('form-group');
+
+                    const label = document.createElement('label');
+                    label.setAttribute('for', column.field);
+                    label.textContent = column.title;
+
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = column.field;
+                    input.name = column.field;
+                    input.classList.add('form-control');
+                    input.required = true;
+
+                    formGroup.appendChild(label);
+                    formGroup.appendChild(input);
+                    form.appendChild(formGroup);
+                }
+            });
+
+            // Show the modal
+            showModal();
+
+            form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const activeTab = document.querySelector('.tab-button.active').dataset.tab;
+
+            // Remove the 'id' field from the formData
+            formData.delete('id');
+
+            fetch(`/submit_form/${activeTab}/`, {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Data submitted successfully!');
+                    closeModal();
+                    loadTableData(activeTab);
+                } else {
+                    alert('Error submitting data.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        });
+
+        // Event listener to close the form modal
+        spanClose.addEventListener('click', closeModal);
+        // Event listener to close the modal
+        closeModalAddSchedule.addEventListener('click', function() {
+            modalAddSchedule.style.display = 'none'; // Hide the modal by setting display to 'none'
+        });
+
+        // Close the modal when clicking outside of it
+        window.addEventListener('click', function (event) {
+            if (event.target == formModal) {
+                closeModal();
+            }
+        });
+    });
+
+    </script>
+
+
+    <script>
+        var $table = $('#table');
+        var $remove = $('#remove');
+        var selections = [];
+
+        function getIdSelections() {
+            return $.map($table.bootstrapTable('getSelections'), function (row) {
+                return row.id;
+            });
+        }
+
+        function responseHandler(res) {
+            $.each(res.rows, function (i, row) {
+                row.state = $.inArray(row.id, selections) !== -1;
+            });
+            return res;
+        }
+
+        function detailFormatter(index, row) {
+            var html = [];
+            $.each(row, function (key, value) {
+                html.push('<p><b>' + key + ':</b> ' + value + '</p>');
+            });
+            return html.join('');
+        }
+
+        function operateFormatter(value, row, index) {
+            return [
+                '<a class="like" href="javascript:void(0)" title="Like">',
+                '<i class="fa fa-heart"></i>',
+                '</a>  ',
+                '<a class="remove" href="javascript:void(0)" title="Remove">',
+                '<i class="fa fa-trash"></i>',
+                '</a>'
+            ].join('');
+        }
+
+        window.operateEvents = {
+            'click .like': function (e, value, row, index) {
+                alert('You click like action, row: ' + JSON.stringify(row));
+            },
+            'click .remove': function (e, value, row, index) {
+                $table.bootstrapTable('remove', {
+                    field: 'id',
+                    values: [row.id]
+                });
+            }
+        };
+
+        function initTable() {
+            $table.bootstrapTable('destroy').bootstrapTable({
+                height: 550,
+                locale: $('#locale').val(),
+                columns: [
+                    {
+                        title: '#',
+                        field: 'id',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'УП №',
+                        field: 'up_num',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'Дата',
+                        field: 'date',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'Заказ',
+                        field: 'order',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'НАЗВАНИЕ',
+                        field: 'name',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'ЛИМЦ',
+                        field: 'limtz',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'Приоритет заказа',
+                        field: 'order_priority',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'СМЗ→ЧПУ шт',
+                        field: 'smz_chpu',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'ЧПУ→СМЗ шт',
+                        field: 'chpu_smz',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'Отгрузка(СМЗ) УП №  и Дата',
+                        field: 'shipment',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'ОПЕРАЦИИ',
+                        field: 'operations',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'ВРЕМЯ на ШТ',
+                        field: 'time_for_piece',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'Время на ПАРТИЮ',
+                        field: 'time_for_batch',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'Планируемая дата готовности',
+                        field: 'planned_date_readiness',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'ОВК Изготовление',
+                        field: 'ovk_manufacturing',
+                        align: 'center',
+                        sortable: true
+                    },
+                    {
+                        title: 'Комментарии',
+                        field: 'comments',
+                        align: 'center',
+                        sortable: true
+                    }
+                ]
+          });
+      
+          $table.on('check.bs.table uncheck.bs.table ' +
+                'check-all.bs.table uncheck-all.bs.table',
+                function () {
+                    $remove.prop('disabled', !$table.bootstrapTable('getSelections').length);
+                    selections = getIdSelections();
+                });
+
+            $table.on('all.bs.table', function (e, name, args) {
+                console.log(name, args);
+            });
+
+            $remove.click(function () {
+                var ids = getIdSelections();
+                $table.bootstrapTable('remove', {
+                    field: 'id',
+                    values: ids
+                });
+                $remove.prop('disabled', true);
+            });
+        }
+
+        $(function () {
+            initTable();
+            $('#locale').change(initTable);
+        });
+    </script>  
+
+    <script>
+        function getColumns(schedule) {
+            switch(schedule) {
+                case 'production_plan_bt':
+                    return [
+                        { field: 'checkbox', title: 'Выбрать', checkbox: true},
+                        { field: 'id', title: '№', sortable: true },
+                        { field: 'up_num', title: 'УП №', sortable: true },
+                        { field: 'date', title: 'Дата', sortable: true },
+                        { field: 'order', title: 'Заказ', sortable: true },
+                        { field: 'name', title: 'НАЗВАНИЕ', sortable: true },
+                        { field: 'limtz', title: 'ЛИМЦ', sortable: true },
+                        { field: 'order_priority', title: 'Приоритет заказа', sortable: true },
+                        { field: 'smz_chpu', title: 'СМЗ→ЧПУ шт', sortable: true },
+                        { field: 'chpu_smz', title: 'ЧПУ→СМЗ шт', sortable: true },
+                        { field: 'shipment', title: 'Отгрузка(СМЗ) УП № и Дата', sortable: true },
+                        { field: 'operations', title: 'ОПЕРАЦИИ', sortable: true },
+                        { field: 'time_for_piece', title: 'ВРЕМЯ на ШТ', sortable: true },
+                        { field: 'time_for_batch', title: 'Время на ПАРТИЮ', sortable: true },
+                        { field: 'planned_date_readiness', title: 'Планируемая дата готовности', sortable: true },
+                        { field: 'ovk_manufacturing', title: 'ОВК Изготовление', sortable: true },
+                        { field: 'comments', title: 'Комментарии', sortable: true },
+                    ];
+                case 'production_plan_tbs':
+                    return [
+                        { field: 'checkbox', title: 'Выбрать', checkbox: true},
+                        { field: 'id', title: '№', sortable: true },
+                        { field: 'company', title: 'Компания', sortable: true },
+                        { field: 'name', title: 'Название', sortable: true },
+                        { field: 'drawing', title: 'Наименование Чертежа', sortable: true },
+                        { field: 'quantity', title: 'Количество/шт.', sortable: true },
+                        { field: 'operation', title: 'Операция', sortable: true },
+                        { field: 'time_part', title: 'ВРЕМЯ/шт.(мин.)', sortable: true },
+                        { field: 'time_batch', title: 'ВРЕМЯ/партия(мин.)', sortable: true },
+                        { field: 'price', title: 'Стоимость', sortable: true },
+                        { field: 'deadline', title: 'Сроки', sortable: true },
+                        { field: 'comments', title: 'Комментарии', sortable: true },
+                    ];
+                case 'production_plan_ovk':
+                    return [
+                    { field: 'checkbox', title: 'Выбрать', checkbox: true},
+                        { field: 'id', title: '№', sortable: true },
+                        { field: 'request_date', title: 'Дата составления заявки', sortable: true },
+                        { field: 'request_num', title: '№ заявки', sortable: true },
+                        { field: 'order_mum', title: '№ заказа', sortable: true },
+                        { field: 'name', title: 'Название', sortable: true },
+                        { field: 'limtz', title: 'лимц', sortable: true },
+                        { field: 'quantity', title: 'Количество деталей (шт)', sortable: true },
+                        { field: 'operation', title: 'Операция', sortable: true },
+                        { field: 'comments', title: 'Комментарии', sortable: true },
+                    ];
+                case 'schedule4':
+                    return [
+                        { field: 'id', title: 'ID', sortable: true },
+                        { field: 'employee', title: 'Employee', sortable: true },
+                        { field: 'department', title: 'Department', sortable: true },
+                        { field: 'salary', title: 'Salary', sortable: true },
+                        { field: 'hire_date', title: 'Hire Date', sortable: true }
+                    ];
+                default:
+                    return [];
+            }            
+
+        }
+    
+        function initTable(schedule, data) {
+            $('#table').bootstrapTable('destroy').bootstrapTable({
+                columns: getColumns(schedule),
+                data: data,
+                search: true,
+                pagination: true,
+                showRefresh: true,
+                showColumns: true,
+                clickToSelect: true,
+                showExport: true
+            });
+
+            $table.on('check.bs.table uncheck.bs.table ' +
+                'check-all.bs.table uncheck-all.bs.table',
+                function () {
+                    $remove.prop('disabled', !$table.bootstrapTable('getSelections').length);
+                    selections = getIdSelections();
+                });
+
+            $table.on('all.bs.table', function (e, name, args) {
+                console.log(name, args);
+            });
+
+            $remove.click(function () {
+                var ids = getIdSelections();
+                $table.bootstrapTable('remove', {
+                    field: 'id',
+                    values: ids
+                });
+                $remove.prop('disabled', true);
+            });
+        }
+
+        function loadTableData(schedule) {
+            $('#table').bootstrapTable('destroy'); // Destroy the current table instance
+            $('#table').empty(); // Remove all existing content within the table
+
+            // Initialize the table with new data and columns
+            fetch(`/get_production_schedule_data?schedule=${schedule}`)
+                .then(response => response.json())
+                .then(data => {
+                    $('#table').bootstrapTable({
+                        columns: data.columns.map(column => ({
+                            field: column,
+                            title: column,
+                            sortable: true
+                        })),
+                        data: data.rows,
+                        search: true,
+                        pagination: true,
+                        showRefresh: true,
+                        showColumns: true,
+                        clickToSelect: true,
+                        showExport: true
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        $(document).ready(function() {
+            $('.tab-button').click(function() {
+                $('.tab-button').removeClass('active');
+                $(this).addClass('active');
+                const schedule = $(this).data('tab');
+                loadTableData(schedule);
+            });
+
+            // Load initial data for the first tab
+            loadTableData('Production_Plan_BT');
+        });
+    </script>
+
+</body>
+</html>

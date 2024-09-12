@@ -1,0 +1,35 @@
+# Python bytecode
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Environment variables
+.env
+
+# Django migrations
+*/migrations/
+*/Deleted Migrations/
+*/OLD__After Adding QR Code__migrations/
+*/OLD__After Adding QR Code__migrations — копия/
+*/Redis/
+*/mysql-9.0.0-winx64/
+mysql-9.0.0-winx64.zip
+mysql.exe
+*/monitor_dashboard/
+
+# Database files
+db.sqlite3
+test_maria.sql
+
+# # Static and media files
+# /static/
+# media/
+
+# IDE and OS specific files
+.vscode/
+.idea/
+.DS_Store
+
+# Environment-specific configuration
+.env

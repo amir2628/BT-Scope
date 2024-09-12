@@ -1,0 +1,220 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #1C2127;
+    color: white;
+    overflow: hidden; /* Prevents scrolling if it's not needed */
+}
+
+.container {
+    display: flex;
+    width: 80%;
+    height: 80%;
+    font-family: "Reddit Mono", monospace;
+    background-color: #1C2127;
+    position: relative;
+}
+
+.login-section, .qr-section {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+    /* box-shadow: 0px 0px 15px -2px rgb(0, 0, 0);
+    background-color: #ffffff; */
+    transition: all 0.5s ease;
+    opacity: 0;
+    transform: scale(0.9);
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 10; /* Ensure login section is above other content */
+}
+
+.qr-section {
+    display: none;
+    /* Initially hidden */
+}
+
+.login-section.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.qr-section.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.login-section.inactive {
+    opacity: 0;
+    transform: scale(0.9);
+}
+
+.qr-section.inactive {
+    opacity: 0;
+    transform: scale(0.9);
+}
+
+.login-section img, .qr-section img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    max-width: 400px; /* Limit the form width */
+    margin: 0 auto;   /* Center the form */
+}
+
+input[type="text"], input[type="password"], input[type="email"] {
+    width: 100%;
+    padding: 8px;    /* Adjusted padding for smaller inputs */
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0px 0px 15px -2px rgba(79, 78, 78, 0.65);
+}
+
+button {
+    padding: 8px;    /* Adjusted padding for smaller buttons */
+    margin-top: 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    max-width: 200px; /* Limit the button width */
+    margin-left: auto;
+    margin-right: auto;
+    transition: background-color 0.3s ease;
+    box-shadow: 0px 0px 15px -2px rgba(79, 78, 78, 0.65);
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button#toggle-qr{
+    background-color: #d59d03;
+}
+
+button#toggle-qr:hover{
+    background-color: #936d03;
+}
+
+button#register {
+    background-color: #28a745;
+}
+
+button#register:hover {
+    background-color: #207c35;
+}
+
+.or {
+    text-align: center;
+    margin: 20px 0;
+    /* color: white; */
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    justify-content: center; /* Center the checkbox container */
+}
+
+.checkbox-container input {
+    margin-right: 5px;
+}
+
+a#forgot-password {
+    color: white;
+    text-decoration: none;
+    margin-top: 20px;
+    display: block;
+    text-align: center; /* Center the link */
+}
+
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.4); /* Black background with opacity */
+}
+
+.modal-content {
+    background-color: #1C2127;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 500px;
+    border-radius: 8px;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#forgot-password-form {
+    display: flex;
+    flex-direction: column;
+}
+
+#forgot-password-form input {
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#forgot-password-form button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#forgot-password-form button:hover {
+    background-color: #0056b3;
+}
+
+#response-message {
+    color: #ff0000;
+    margin-top: 10px;
+}
