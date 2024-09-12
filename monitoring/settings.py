@@ -122,17 +122,6 @@ ASGI_APPLICATION = 'monitoring.asgi.application'
 # }
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'test_maria',
-#         'USER': 'test',
-#         'PASSWORD': '123',
-#         'HOST': 'localhost',  # Or the IP address of your MariaDB server
-#         'PORT': '3306',       # Default MariaDB port
-#     }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
