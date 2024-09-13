@@ -114,12 +114,6 @@ ASGI_APPLICATION = 'monitoring.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 
 
 DATABASES = {
@@ -153,32 +147,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'console': {
-#             'class': 'logging.StreamHandler',
-#         },
-#         'file': {
-#             'class': 'logging.FileHandler',
-#             'filename': 'debug.log',
-#         },
-#     },
-#     'loggers': {
-#         'django': {
-#             'handlers': ['console', 'file'],
-#             'level': 'DEBUG',
-#         },
-#         'monitoring_dashboard': {  # Change 'myapp' to the name of your app
-#             'handlers': ['console', 'file'],
-#             'level': 'DEBUG',
-#             'propagate': True,
-#         },
-#     },
-# }
 
 
 
