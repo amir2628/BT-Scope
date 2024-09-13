@@ -51,17 +51,44 @@ from .models import Instrument, ThreadRing, ThreadPlug, SmoothGauge
 # admin.site.register(Profile)
 
 
+# class CustomUserAdmin(UserAdmin):
+#     # Fields to be displayed in the user detail page in the admin
+#     fieldsets = (
+#         (None, {'fields': ('username', 'password')}),
+#         ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
+#         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',
+#                                     'groups', 'user_permissions')}),
+#         ('Important dates', {'fields': ('last_login', 'date_joined')}),
+#         ('Additional info', {'fields': ('role', 'middle_name', 'position')}),
+#     )
+    
+#     # Fields to be displayed in the add user page in the admin
+#     add_fieldsets = (
+#         (None, {
+#             'classes': ('wide',),
+#             'fields': ('username', 'password1', 'password2', 'role', 'first_name', 'last_name', 'middle_name', 'position', 'email'),
+#         }),
+#     )
+    
+#     # Fields to be displayed in the user list in the admin
+#     list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff')
+
+#     # Fields to be used for filtering in the user list in the admin
+#     search_fields = ('username', 'first_name', 'last_name', 'email')
+
+# admin.site.register(CustomUser, CustomUserAdmin)
+# admin.site.register(Profile)
+
 class CustomUserAdmin(UserAdmin):
     # Fields to be displayed in the user detail page in the admin
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',
-                                    'groups', 'user_permissions')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),  # Remove 'groups' and 'user_permissions'
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
         ('Additional info', {'fields': ('role', 'middle_name', 'position')}),
     )
-    
+
     # Fields to be displayed in the add user page in the admin
     add_fieldsets = (
         (None, {
@@ -69,7 +96,7 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('username', 'password1', 'password2', 'role', 'first_name', 'last_name', 'middle_name', 'position', 'email'),
         }),
     )
-    
+
     # Fields to be displayed in the user list in the admin
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff')
 
@@ -77,7 +104,7 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ('username', 'first_name', 'last_name', 'email')
 
 admin.site.register(CustomUser, CustomUserAdmin)
-admin.site.register(Profile)
+
 
 admin.site.register(Instrument)
 admin.site.register(ThreadRing)
