@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const totalDays = lastDate;
       console.log("here are the employees: ", employees)
       // <div class="employee-info">${emp.name}<br><span>${emp.role}</span></div>
-      return employees.filter(emp => emp.role === '(regular_user)' || emp.role === '(operator)').map(emp => `
+      return employees.filter(emp => emp.role === 'regular_user' || emp.role === 'operator').map(emp => `
         <tr data-user-id="${emp.id}">
           <td>
             <div class="employee">

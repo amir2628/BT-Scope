@@ -224,7 +224,7 @@ EMAIL_HOST_USER = 'AdminCNC' #'your-email@example.com'
 EMAIL_HOST_PASSWORD = '3653f7Xr4' #'your-email-password'
 DEFAULT_FROM_EMAIL = 'webmaster@yourdomain.com'
 # Site domain settings (optional, if using Sites framework)
-SITE_ID = 1
+# SITE_ID = 1
 
 # If not using the Sites framework, explicitly set the domain and protocol
 DJANGO_REST_PASSWORDRESET_DOMAIN = 'localhost:8000'

@@ -63,6 +63,7 @@ def update_cnc_status(request):
     # Handle invalid requests
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
+@csrf_exempt
 def logout_view(request):
     logout(request)
     return redirect('landing')
@@ -589,6 +590,8 @@ def password_reset_view(request):
 
 
 def reset_password_form(request, uid, token):
+    if request.method == 'POST':
+        print(request.body)  # Log the request body
     print(f"UID: {uid}, Token: {token}")
     return render(request, 'monitoring_dashboard/reset_password_form.html', {'uid': uid, 'token': token})
 
@@ -1422,7 +1425,7 @@ def employee_list(request):
         {
             "id": emp['id'],  # Include the id in the response
             "name": f"{emp['first_name']} {emp['middle_name']} {emp['last_name']}",
-            'role': f"({emp['role']})"
+            'role': f"{emp['role']}"
         }
         for emp in employees
     ]
