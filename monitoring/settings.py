@@ -229,6 +229,8 @@ DEFAULT_FROM_EMAIL = 'webmaster@yourdomain.com'
 # If not using the Sites framework, explicitly set the domain and protocol
 DJANGO_REST_PASSWORDRESET_DOMAIN = 'localhost:8000'
 DJANGO_REST_PASSWORDRESET_PROTOCOL = 'http'
+# DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE = True
+
 
 
 REST_FRAMEWORK = {

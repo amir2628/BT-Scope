@@ -519,74 +519,74 @@ def register(request):
     
     return render(request, 'monitoring_dashboard/register.html', {'form': form})
 
-from django.contrib.auth import get_user_model
-import logging
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.contrib.sites.shortcuts import get_current_site
-from django.urls import reverse
-import json
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .models import CustomUser
+# from django.contrib.auth import get_user_model
+# import logging
+# from django.contrib.auth.tokens import default_token_generator
+# from django.core.mail import send_mail
+# from django.template.loader import render_to_string
+# from django.utils.http import urlsafe_base64_encode
+# from django.utils.encoding import force_bytes
+# from django.contrib.sites.shortcuts import get_current_site
+# from django.urls import reverse
+# import json
+# from django.http import JsonResponse
+# from django.views.decorators.csrf import csrf_exempt
+# from .models import CustomUser
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
-@csrf_exempt
-def password_reset_view(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            email = data.get('email')
-            logger.debug(f"Received email for password reset: {email}")
+# @csrf_exempt
+# def password_reset_view(request):
+#     if request.method == 'POST':
+#         try:
+#             data = json.loads(request.body)
+#             email = data.get('email')
+#             logger.debug(f"Received email for password reset: {email}")
 
-            if email:
-                users = CustomUser.objects.filter(email=email)
-                if users.exists():
-                    for user in users:
-                        try:
-                            token = default_token_generator.make_token(user)
-                            uid = urlsafe_base64_encode(force_bytes(user.pk))
-                            current_site = get_current_site(request)
-                            reset_link = reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
-                            reset_url = f"http://{current_site.domain}{reset_link}"
+#             if email:
+#                 users = CustomUser.objects.filter(email=email)
+#                 if users.exists():
+#                     for user in users:
+#                         try:
+#                             token = default_token_generator.make_token(user)
+#                             uid = urlsafe_base64_encode(force_bytes(user.pk))
+#                             current_site = get_current_site(request)
+#                             reset_link = reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+#                             reset_url = f"http://{current_site.domain}{reset_link}"
                             
-                            logger.debug(f"UID: {uid}, Token: {token}")
-                            logger.debug(f"Reset Link: {reset_link}")
-                            logger.debug(f"Full Reset URL: {reset_url}")
+#                             logger.debug(f"UID: {uid}, Token: {token}")
+#                             logger.debug(f"Reset Link: {reset_link}")
+#                             logger.debug(f"Full Reset URL: {reset_url}")
 
-                            email_subject = 'Password Reset Request'
-                            email_body = render_to_string('registration/password_reset_email.html', {
-                                'user': user,
-                                'reset_url': reset_url,
-                                'domain': current_site.domain,
-                                'site_name': current_site.name,
-                            })
+#                             email_subject = 'Password Reset Request'
+#                             email_body = render_to_string('registration/password_reset_email.html', {
+#                                 'user': user,
+#                                 'reset_url': reset_url,
+#                                 'domain': current_site.domain,
+#                                 'site_name': current_site.name,
+#                             })
 
-                            send_mail(
-                                email_subject,
-                                email_body,
-                                'from@example.com',
-                                [email]
-                            )
-                            logger.debug(f"Sent password reset email to: {email} with reset link: {reset_url}")
-                        except Exception as e:
-                            logger.error(f"Error sending password reset email to {email}: {e}")
-                            return JsonResponse({'success': False, 'message': 'An error occurred while sending the email.'})
-                    return JsonResponse({'success': True})
-                else:
-                    logger.warning(f"No account found with email: {email}")
-                    return JsonResponse({'success': False, 'message': 'No account found with this email.'})
-            else:
-                logger.warning("Invalid email input")
-                return JsonResponse({'success': False, 'message': 'Invalid email'})
-        except Exception as e:
-            logger.error(f"Unexpected error during password reset: {e}")
-            return JsonResponse({'success': False, 'message': 'An unexpected error occurred.'})
-    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+#                             send_mail(
+#                                 email_subject,
+#                                 email_body,
+#                                 'from@example.com',
+#                                 [email]
+#                             )
+#                             logger.debug(f"Sent password reset email to: {email} with reset link: {reset_url}")
+#                         except Exception as e:
+#                             logger.error(f"Error sending password reset email to {email}: {e}")
+#                             return JsonResponse({'success': False, 'message': 'An error occurred while sending the email.'})
+#                     return JsonResponse({'success': True})
+#                 else:
+#                     logger.warning(f"No account found with email: {email}")
+#                     return JsonResponse({'success': False, 'message': 'No account found with this email.'})
+#             else:
+#                 logger.warning("Invalid email input")
+#                 return JsonResponse({'success': False, 'message': 'Invalid email'})
+#         except Exception as e:
+#             logger.error(f"Unexpected error during password reset: {e}")
+#             return JsonResponse({'success': False, 'message': 'An unexpected error occurred.'})
+#     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
 def reset_password_form(request, uid, token):
@@ -622,16 +622,16 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
 
     # Email content
     email_plaintext_message = f"""
-    Hello {first_name} {middle_name} {last_name},
+    Здравствуйте {first_name} {middle_name} {last_name},
 
-    You requested a password reset. Please go to the following page and choose a new password:
+    Вы запросили сброс пароля. Пожалуйста, перейдите на следующую страницу и выберите новый пароль:
 
     {reset_url}
 
-    If you did not request this, please ignore this email.
+    Если вы не запрашивали это, пожалуйста, проигнорируйте это письмо.
 
-    Thanks,
-    Your team
+    С уважением;,
+    Команда Scope
     """
 
     # Send the email
