@@ -150,11 +150,12 @@ def planning(request):
         return redirect('unauthorized')
     production_schedule = Schedule.objects.all()
     production_plan_bt = ProductionPlanBT.objects.all()
-
+    position = getattr(request.user, 'position', 'Not Provided')
     context = {
         'production_schedule': production_schedule,
         'production_plan_bt': production_plan_bt,
-        'user': request.user
+        'user': request.user,
+        'user_position': position,
     }
 
     return render(request, 'monitoring_dashboard/planning.html', context)
@@ -466,7 +467,12 @@ def landing(request):
 def inventory(request):
     if request.user.role == 'operator':
         return redirect('unauthorized')
-    return render(request, 'monitoring_dashboard/inventory.html')
+    position = getattr(request.user, 'position', 'Not Provided')
+    context = {
+        'user': request.user,
+        'user_position': position,
+    }
+    return render(request, 'monitoring_dashboard/inventory.html', context)
 
 # ===========> Added to include the role in the view <===============
 def register(request):
@@ -763,23 +769,23 @@ def add_delivered_product(request):
 
 
 
-def inventory(request):
-    if request.user.role == 'operator':
-        return redirect('unauthorized')
-    materials = Material.objects.all()
-    finished_products = FinishedProduct.objects.all()
-    delivered_products = DeliveredProduct.objects.all()
-    total_materials_count = materials.count()
-    total_finished_products = finished_products.count()
-    total_delivered_products = delivered_products.count()
-    return render(request, 'monitoring_dashboard/inventory.html', {
-        'materials': materials,
-        'finished_products': finished_products,
-        'delivered_products': delivered_products,
-        'total_materials' : total_materials_count,
-        'total_finished_products' : total_finished_products,
-        'total_delivered_products' : total_delivered_products
-    })
+# def inventory(request):
+#     if request.user.role == 'operator':
+#         return redirect('unauthorized')
+#     materials = Material.objects.all()
+#     finished_products = FinishedProduct.objects.all()
+#     delivered_products = DeliveredProduct.objects.all()
+#     total_materials_count = materials.count()
+#     total_finished_products = finished_products.count()
+#     total_delivered_products = delivered_products.count()
+#     return render(request, 'monitoring_dashboard/inventory.html', {
+#         'materials': materials,
+#         'finished_products': finished_products,
+#         'delivered_products': delivered_products,
+#         'total_materials' : total_materials_count,
+#         'total_finished_products' : total_finished_products,
+#         'total_delivered_products' : total_delivered_products
+#     })
 
 
 def get_materials_chart_data(request):
@@ -1059,11 +1065,14 @@ def cnc_planning(request):
 
     # Get the unique CNC machines assigned
     cnc_machines = list(set(schedule.cnc_machine for schedule in user_schedules))
-
+    position = getattr(request.user, 'position', 'Not Provided')
     # Create a dictionary of CNC machines to pass to the template
     context = {
-        'cnc_machines': cnc_machines
+        'cnc_machines': cnc_machines,
+        'user': request.user,
+        'user_position': position,
     }
+    
     return render(request, 'monitoring_dashboard/cnc.html', context)
 
 def monitoring(request):
@@ -1075,10 +1084,12 @@ def monitoring(request):
     # Get the unique CNC machines assigned
     # cnc_machines = list(set(schedule.cnc_machine for schedule in user_schedules))
     # cnc_machines = list(set(schedule.cnc_machine for schedule in user_schedules))
-
+    position = getattr(request.user, 'position', 'Not Provided')
     # Create a dictionary of CNC machines to pass to the template
     context = {
-        'cnc_machines': cnc_machines
+        'cnc_machines': cnc_machines,
+        'user': request.user,
+        'user_position': position,
     }
     return render(request, 'monitoring_dashboard/monitoring.html', context)
 
