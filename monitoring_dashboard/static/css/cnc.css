@@ -1094,6 +1094,7 @@ input:hover{
     cursor: pointer;
     transition: box-shadow 0.3s ease, transform 0.3s ease;
     margin-right: 10px;
+    margin-bottom: 20px;
 
 
     /* width: 500px; */
@@ -2021,4 +2022,46 @@ button[type="submit"] {
 .loader[data-status='pause'] {
     background: radial-gradient(circle, #ff7900, #ff5400);
     animation: pulse-pause 2s infinite;
+}
+
+
+/* Style for the container */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height to center vertically */
+    text-align: center;
+}
+
+/* Common style for the circles */
+.circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    font-weight: bold;
+    margin: 10px; /* Space between circles */
+    color: white;
+}
+
+/* Individual circle colors */
+.red {
+    background-color: #990000;
+}
+
+.yellow {
+    background-color: #cccc00;
+    color: black; /* Better contrast with yellow */
+}
+
+.orange {
+    background-color: #ff5400;
+}
+
+.green {
+    background-color: #009900;
 }

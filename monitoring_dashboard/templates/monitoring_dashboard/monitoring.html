@@ -64,8 +64,14 @@
         </header>
         <div class="content">
             {% block content %}
+            <!-- <div class="container">
+                <div class="circle red">X</div>
+                <div class="circle yellow">X</div>
+                <div class="circle orange">X</div>
+                <div class="circle green">X</div>
+            </div> -->
             <div class="dashboard">
-                <!-- <div class="animated-border-box-glow"></div> -->
+                <!-- <div class="animated-border-box-glow"></div> -->                
                 {% for machine in cnc_machines %}
                 <div class="card idle" id="cnc{{ machine.id }}" data-id="{{ machine.id }}">
                     <div class="loader" data-status="inactive">
