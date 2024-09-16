@@ -37,6 +37,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('register/', views.register, name='register'),
     path('planning/', views.planning, name='planning'),
+    path('monitoring/', views.monitoring, name='monitoring'),
     path('shifts-planning/', views.shifts_page, name='shifts_page'),
     path('add-material/', views.add_material, name='add_material'),
     path('add-schedule/', views.add_schedule, name='add_schedule'),
@@ -123,6 +124,7 @@ urlpatterns = [
     # =======> Added when I wanted to implement upload files and show then in the modal form in cnc.html <========
     path('get-schedule-files/<int:schedule_id>/', views.get_schedule_files, name='get_schedule_files'),
     path('get-schedules-for-machine/<int:machine_id>/', views.get_schedules_for_machine, name='get_schedules_for_machine'),
+    path('get-schedules-for-machine-for-monitoring/<int:machine_id>/', views.get_schedules_for_machine_forMonitoring, name='get_schedules_for_machine_forMonitoring'),
     path('upload-files/', views.upload_files, name='upload_files'),
     path('delete-file/<int:file_id>/', views.delete_file, name='delete_file'),
 

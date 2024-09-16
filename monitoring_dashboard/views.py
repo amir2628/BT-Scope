@@ -1064,7 +1064,21 @@ def cnc_planning(request):
     }
     return render(request, 'monitoring_dashboard/cnc.html', context)
 
+def monitoring(request):
+    if request.user.role == 'operator':
+        return redirect('unauthorized')
 
+    cnc_machines = CNCMachine.objects.all()
+
+    # Get the unique CNC machines assigned
+    # cnc_machines = list(set(schedule.cnc_machine for schedule in user_schedules))
+    # cnc_machines = list(set(schedule.cnc_machine for schedule in user_schedules))
+
+    # Create a dictionary of CNC machines to pass to the template
+    context = {
+        'cnc_machines': cnc_machines
+    }
+    return render(request, 'monitoring_dashboard/monitoring.html', context)
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
@@ -1178,7 +1192,54 @@ def get_schedules_for_machine(request, machine_id):
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
 
-    
+@csrf_exempt
+def get_schedules_for_machine_forMonitoring(request, machine_id):
+    try:
+        cnc_machine = CNCMachine.objects.get(id=machine_id)
+        today = localdate()
+        
+        # Filtering schedules that include today in their range
+        schedules = Schedule.objects.filter(
+            cnc_machine=cnc_machine
+        )
+        print("here is the schedules with filters:")
+        print(schedules)
+
+        schedule_data = []
+
+        for schedule in schedules:
+            files = schedule.files.all()
+            file_data = [{'url': file.file.url, 'name': file.file.name, 'description': file.description} for file in files]
+            
+            # Retrieve operator details
+            try:
+                operator = CustomUser.objects.get(username=schedule.operator_name)
+                operator_full_name = f"{operator.username} - {operator.first_name} {operator.middle_name} {operator.last_name}"
+            except CustomUser.DoesNotExist:
+                operator_full_name = schedule.operator_name  # Fallback to the username if user not found
+
+            schedule_data.append({
+                'id': schedule.id,
+                'startDate': schedule.start_date,
+                'endDate': schedule.end_date,
+                'productType': schedule.product_type,
+                'quantity': schedule.quantity,
+                'operatorName': operator_full_name,
+                'cncMachineId': cnc_machine.id,
+                'cncMachine': cnc_machine.name,
+                'urgent': schedule.urgent,  # Include the urgent status
+                'files': file_data,
+                'finished': schedule.is_completed,  # Include the finished status
+                'orderNum': schedule.order_num,
+                'limtz': schedule.limtz,
+                'paused': schedule.is_paused,
+            })
+
+        return JsonResponse({'success': True, 'schedules': schedule_data})
+    except CNCMachine.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'CNC Machine not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 
 # =======> This is for registering the time spent each time we click on the pause/resume button
 @csrf_exempt

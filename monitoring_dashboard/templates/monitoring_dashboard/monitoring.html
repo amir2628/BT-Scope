@@ -28,8 +28,8 @@
             <li><a href="{% url 'inventory' %}">Склад</a></li>
             <li ><a href="{% url 'planning' %}">Планирование</a></li>
             <li><a href="{% url 'shifts_page' %}">Смены</a></li>
-            <li class="active"><a href="{% url 'cnc_planning' %}">Очередь с ЧПУ</a></li>
-            <li><a href="{% url 'monitoring' %}">Мониторинг ЧПУ</a></li>
+            <li><a href="{% url 'cnc_planning' %}">Очередь с ЧПУ</a></li>
+            <li class="active"><a href="{% url 'monitoring' %}">Мониторинг ЧПУ</a></li>
         </ul>
         <div class="sidebar-footer">
             <div class="privacy">
@@ -145,7 +145,7 @@ function closeModal() {
 }
 
 function fetchScheduleDetails(machineId) {
-    fetch(`/get-schedules-for-machine/${machineId}/`)
+    fetch(`/get-schedules-for-machine-for-monitoring/${machineId}/`)
         .then(response => response.json())
         .then(data => {
             const modal = document.getElementById('cutommodal');
