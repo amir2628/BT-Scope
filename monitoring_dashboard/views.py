@@ -161,8 +161,8 @@ def planning(request):
 
 @csrf_exempt
 def shifts_page(request):
-    if request.user.role == 'operator' or request.user.role == 'regular_user':
-        return redirect('unauthorized')
+    # if request.user.role == 'operator' or request.user.role == 'regular_user':
+    #     return redirect('unauthorized')
     production_schedule = Schedule.objects.all()
     production_plan_bt = ProductionPlanBT.objects.all()
     context = {

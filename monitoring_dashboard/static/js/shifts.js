@@ -213,8 +213,8 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
           </td>
           ${Array.from({ length: totalDays }).map((_, i) => `
-            <td ondblclick="openForm(this)" data-date="${i + 1}"></td>
-            <td ondblclick="openForm(this)" data-date="${i + 1}"></td>
+            <td ondblclick="openForm(this, userRole)" data-date="${i + 1}"></td>
+            <td ondblclick="openForm(this, userRole)" data-date="${i + 1}"></td>
           `).join('')}
           <td class="total-hours">0</td>
         </tr>
@@ -249,7 +249,13 @@ document.addEventListener('DOMContentLoaded', function () {
     
   
     // Function to open the shift form
-    window.openForm = function (cell) {
+    window.openForm = function (cell, userRole) {
+
+        // Check if the user's role is 'manager'
+      if (userRole !== 'manager') {
+        alert('У вас нет прав на добавление/редактирование смен.');
+        return;  // Prevent the form from opening if not a manager
+      }
       activeCell = cell;
       activeShift = cell.querySelector('.shift');
       shiftForm.style.display = 'block';
