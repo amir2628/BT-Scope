@@ -191,6 +191,15 @@ header .profile span {
   color: #ecf0f1;
 }
 
+.profile-info {
+  display: flex;
+  flex-direction: column;  /* Stack spans vertically */
+  margin-right: 10px;  /* Space between the text and image */
+}
+.profile-info span {
+  margin-bottom: 5px;  /* Adds spacing between the spans */
+}
+
 header .profile img {
   width: 40px;
   height: 40px;
