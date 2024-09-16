@@ -42,6 +42,7 @@
             <h1>С возвращением, {{ user.first_name }}!</h1>
             <div class="profile">
                 <span>{{ user.first_name }} {{ user.middle_name }} {{ user.last_name }}</span>
+                <span>{{ user_position }}</span>
                 <img src="{% static 'images/profile-pic.jpg' %}" alt="Profile Picture">
                 <!-- Logout button -->
                 <form method="POST" action="{% url 'logout' %}" style="display:inline;">

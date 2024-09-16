@@ -163,12 +163,14 @@ def planning(request):
 def shifts_page(request):
     # if request.user.role == 'operator' or request.user.role == 'regular_user':
     #     return redirect('unauthorized')
+    position = getattr(request.user, 'position', 'Not Provided')
     production_schedule = Schedule.objects.all()
     production_plan_bt = ProductionPlanBT.objects.all()
     context = {
         'production_schedule': production_schedule,
         'production_plan_bt': production_plan_bt,
-        'user': request.user
+        'user': request.user,
+        'user_position': position,
     }
 
     return render(request, 'monitoring_dashboard/shifts.html', context)
