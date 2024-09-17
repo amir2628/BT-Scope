@@ -350,7 +350,9 @@ function startWork(scheduleId) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken")
+            "X-CSRFToken": getCookie("csrftoken"),
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify({ schedule_id: scheduleId })
     })
@@ -414,7 +416,9 @@ function finishWork(scheduleId, comments) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken")
+            "X-CSRFToken": getCookie("csrftoken"),
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify({ schedule_id: scheduleId, comments: comments, elapsed_time: elapsedTimeMinutes, details_quantity: detailsQuantity, details_time: detailsTime })
     })
@@ -440,7 +444,9 @@ function endShift(scheduleId) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken")
+            "X-CSRFToken": getCookie("csrftoken"),
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify({ schedule_id: scheduleId, elapsed_time: elapsedTimeMinutes })
     })
@@ -460,7 +466,13 @@ function endShift(scheduleId) {
 
 function resumeWork(scheduleId) {
     // Step 1: Fetch saved timer data
-    fetch(`/get-schedule-details-Timer-elapsed/${scheduleId}/`)
+    fetch(`/get-schedule-details-Timer-elapsed/${scheduleId}/`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+            }
+        })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -479,7 +491,9 @@ function resumeWork(scheduleId) {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-CSRFToken": getCookie("csrftoken")
+                        "X-CSRFToken": getCookie("csrftoken"),
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: JSON.stringify({ schedule_id: scheduleId })
                 })
@@ -536,7 +550,13 @@ function getCookie(name) {
             
                     function fetchMachineStatus(machineId) {
                         if (machineId === 7) {
-                            fetch(`/get-machine-status/${machineId}/`)
+                            fetch(`/get-machine-status/${machineId}/`, {
+                                    method: 'GET',
+                                    headers: {
+                                        'Accept': 'application/json',
+                                        'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+                                    }
+                                })
                                 .then(response => response.json())
                                 .then(data => {
                                     const statusElement = document.getElementById(`cnc${machineId}_status`);

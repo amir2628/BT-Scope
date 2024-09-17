@@ -581,6 +581,10 @@
             fetch(`/submit_form/${activeTab}/`, {
                 method: 'POST',
                 body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+                },
             })
             .then(response => response.json())
             .then(data => {
