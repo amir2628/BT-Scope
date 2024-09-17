@@ -2,7 +2,13 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     // Fetch and render Total Materials Chart
-    fetch('/get-materials-chart-data/')
+    fetch('/get-materials-chart-data/', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+        }
+    })
         .then(response => response.json())
         .then(data => {
             const ctx = document.getElementById('TotalMaterialsChart').getContext('2d');
@@ -26,7 +32,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     // Fetch and render Total Inventory Chart
-    fetch('/get-inventory-chart-data/')
+    fetch('/get-inventory-chart-data/', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+        }
+    })
         .then(response => response.json())
         .then(data => {
             const ctx = document.getElementById('TotalInventoryChart').getContext('2d');
@@ -50,7 +62,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     // Fetch and render Deliveries Chart
-    fetch('/get-deliveries-chart-data/')
+    fetch('/get-deliveries-chart-data/', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+        }
+    })
         .then(response => response.json())
         .then(data => {
             const ctx = document.getElementById('deliveriesChart').getContext('2d');
