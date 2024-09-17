@@ -144,7 +144,9 @@ def get_schedule_by_id(request, schedule_id):
     except Schedule.DoesNotExist:
         return JsonResponse({'error': 'Schedule not found'}, status=404)
 
+
 @csrf_exempt
+@login_required(login_url='login')
 def planning(request):
     if request.user.role == 'operator':
         return redirect('unauthorized')
@@ -161,6 +163,7 @@ def planning(request):
     return render(request, 'monitoring_dashboard/planning.html', context)
 
 @csrf_exempt
+@login_required(login_url='login')
 def shifts_page(request):
     # if request.user.role == 'operator' or request.user.role == 'regular_user':
     #     return redirect('unauthorized')
@@ -463,7 +466,7 @@ def get_operators(request):
 def landing(request):
     return render(request, 'monitoring_dashboard/landing.html')
 
-@login_required
+@login_required(login_url='login')
 def inventory(request):
     if request.user.role == 'operator':
         return redirect('unauthorized')
@@ -1036,7 +1039,7 @@ from .models import Schedule, CNCMachine
 
 # This is for sending all the schedules for each cnc machine assigned to each operator when they log in.
 # The filtering now is for all the schedules for today, as well as all the schedules which were not completed in their timespan
-@login_required
+@login_required(login_url='login')
 def cnc_planning(request):
     today = timezone.now().date()
     user = request.user
@@ -1075,6 +1078,7 @@ def cnc_planning(request):
     
     return render(request, 'monitoring_dashboard/cnc.html', context)
 
+@login_required(login_url='login')
 def monitoring(request):
     if request.user.role == 'operator':
         return redirect('unauthorized')
