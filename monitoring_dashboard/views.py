@@ -804,7 +804,7 @@ def get_materials_chart_data(request):
 
 
 # # ========================> The previous view for querying the schedule was not dynamic. So I wrote the next one:
-
+@login_required(login_url='login')
 def get_production_schedule_data(request):
     schedule_type = request.GET.get('schedule')
     

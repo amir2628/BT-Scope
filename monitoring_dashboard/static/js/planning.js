@@ -42,6 +42,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
                 },
                 body: JSON.stringify({ schedule_ids: ids }),
             });
@@ -262,6 +264,9 @@ document.addEventListener("DOMContentLoaded", function() {
         fetch('/add-schedule/', {
             method: 'POST',
             body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'  // Set this to identify AJAX requests
+            }
         })
         .then(response => response.json())
         .then(data => {
@@ -297,7 +302,13 @@ document.addEventListener("DOMContentLoaded", function() {
     function fetchAndGenerateCalendar(month, year) {
         events = {};
         console.log(`Fetching schedule for month ${month + 1} and year ${year}`);
-        fetch('/get-schedule/')
+        fetch('/get-schedule/', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+            }
+        })
         .then(response => response.json())
         .then(data => {
             data.forEach(schedule => {
@@ -343,7 +354,13 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     function populateOperatorSelect() {
-        fetch('/get-operators/')
+        fetch('/get-operators/', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 const operatorSelect = document.getElementById('operatorSelect');
@@ -361,7 +378,13 @@ document.addEventListener("DOMContentLoaded", function() {
     function populateCncMachineSelect() {
         const cncMachineSelect = document.getElementById('cncMachine');
 
-        fetch('/get_cnc_machines/')
+        fetch('/get_cnc_machines/', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 cncMachineSelect.innerHTML = '';
@@ -645,7 +668,8 @@ document.addEventListener('DOMContentLoaded', function () {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
+                'X-CSRFToken': getCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
             },
             body: JSON.stringify({ ids: idsToDelete, schedule: activeTab })
         })
@@ -714,7 +738,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 type: 'POST',
                 data: formData,
                 headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 success: function (response) {
                     console.log("Response:", response);  // Debug statement
@@ -813,7 +838,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fetch schedule data from the server
     function fetchSchedules() {
-        fetch('/get-schedule/')
+        fetch('/get-schedule/', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 initTable(data);
@@ -823,7 +854,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fetch operators from the server
     function fetchOperators() {
-        fetch('/get-operators/')
+        fetch('/get-operators/', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 operators = data.operators;
@@ -838,7 +875,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fetch CNC machines from the server
     function fetchCncMachines() {
-        fetch('/get_cnc_machines/')
+        fetch('/get_cnc_machines/', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 cncMachines = data;
@@ -1085,7 +1128,8 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'  // Set this to identify AJAX requests
             },
             body: JSON.stringify(updatedData)
         })
@@ -1107,7 +1151,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     fetch('/upload-files/', {
                         method: 'POST',
                         headers: {
-                            'X-CSRFToken': csrfToken  // Ensure CSRF token is included
+                            'X-CSRFToken': csrfToken,  // Ensure CSRF token is included
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
                         },
                         body: fileData  // Send the files
                     })

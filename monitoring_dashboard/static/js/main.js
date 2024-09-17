@@ -192,6 +192,8 @@ document.addEventListener("DOMContentLoaded", function() {
         fetch('/add-schedule/', {
             method: 'POST',
             body: formData,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
         })
         .then(response => response.json()) // Parse response as JSON
         .then(data => {
@@ -212,7 +214,13 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // Fetch schedule details from Django backend
-    fetch('/get-schedule/')
+    fetch('/get-schedule/', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+        }
+    })
     .then(response => response.json())
     .then(data => {
         data.forEach(schedule => {

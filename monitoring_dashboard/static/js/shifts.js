@@ -403,7 +403,8 @@ document.addEventListener('DOMContentLoaded', function () {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'X-CSRFToken': getCookie('csrftoken')
+              'X-CSRFToken': getCookie('csrftoken'),
+              'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({
               user_id: userId,
