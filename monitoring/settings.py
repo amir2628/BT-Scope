@@ -62,6 +62,7 @@ MIDDLEWARE = [
     # 'monitoring_dashboard.middleware.AuthenticationMiddleware',
     # 'monitoring_dashboard.middleware.OperatorOnlyMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # Add this line for fetching CNC details
+    'monitoring_dashboard.middleware.BlockDirectAccessMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = [

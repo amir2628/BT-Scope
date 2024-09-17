@@ -456,6 +456,7 @@ def add_schedule(request):
 from django.http import JsonResponse
 from .models import CustomUser
 
+@login_required(login_url='login')
 def get_operators(request):
     operators = CustomUser.objects.filter(role='operator').values('username', 'first_name', 'last_name')
     operators_list = [{'username': operator['username'], 'full_name': f"{operator['first_name']} {operator['last_name']}"} for operator in operators]
