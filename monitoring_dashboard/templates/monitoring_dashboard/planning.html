@@ -902,7 +902,13 @@
             $('#table').empty(); // Remove all existing content within the table
 
             // Initialize the table with new data and columns
-            fetch(`/get_production_schedule_data?schedule=${schedule}`)
+            fetch(`/get_production_schedule_data?schedule=${schedule}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+                    }
+                })
                 .then(response => response.json())
                 .then(data => {
                     $('#table').bootstrapTable({
