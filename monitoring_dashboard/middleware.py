@@ -65,6 +65,10 @@ class BlockDirectAccessMiddleware:
             '/submit_form/<str:schedule>/',
             '/delete_schedule_entries/',
             '/create_schedule/',
+            '/get_production_schedule_row/',
+            '/update_production_schedule_data/',
+            '/delete_schedule_entries/',
+            '/update_cnc_status/',
             
         ]
 
