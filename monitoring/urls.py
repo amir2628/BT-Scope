@@ -66,12 +66,12 @@ urlpatterns = [
     path('update_cnc_status/', views.update_cnc_status, name='update_cnc_status'), #added for CNC status opcua
 
     # Added for the new page for CNC planning
-    path('cnc-planning/', views.cnc_planning, name='cnc_planning'), #added for CNC status opcua
+    # path('cnc-planning/', views.cnc_planning, name='cnc_planning'), #added for CNC status opcua
 
     # =======> Added for the QR code functionality <===========
     path('qr_login/', views.qr_login_view, name='qr_login'),
     path('cnc/', views.cnc_planning, name='cnc_planning'),
-    path('unauthorized/', views.unauthorized_view, name='unauthorized'),
+    path('unauthorized/', views.unauthorized_view, name='unauthorized'), #====================================================================================================================>
 
     path('api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     path('reset-password-form/<str:uid>/<str:token>/', views.reset_password_form, name='reset_password_form'),

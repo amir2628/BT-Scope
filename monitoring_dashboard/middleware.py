@@ -69,7 +69,12 @@ class BlockDirectAccessMiddleware:
             '/update_production_schedule_data/',
             '/delete_schedule_entries/',
             '/update_cnc_status/',
+            '/start-work/',
+            '/finish-work/',
+            '/end-shift/',
             
+
+            '/instruments/data/',
         ]
 
     def __call__(self, request):
