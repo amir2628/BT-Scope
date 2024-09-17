@@ -197,7 +197,6 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       renderCalendar(currentMonth, currentYear);
     }
-  
     // Function to fetch employee rows
     async function fetchEmployeeRows(firstDay, lastDate) {
       // const response = await fetch('/api/employees/');
