@@ -75,9 +75,13 @@ class BlockDirectAccessMiddleware:
             '/resume-work/',
             '/get-schedule-details-Timer-elapsed/<int:schedule_id>/',
             '/api/employees/',
-
-
+            '/api/save_shift/',
+            '/api/shifts/<int:year>/<int:month>/',
             '/instruments/data/',
+            '/instruments/save/',
+            '/instruments/delete/<int:instrument_id>/',
+            '/threadrings/data/',
+            
         ]
 
     def __call__(self, request):
