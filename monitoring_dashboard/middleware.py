@@ -61,6 +61,11 @@ class BlockDirectAccessMiddleware:
             '/get-materials-chart-data/',
             '/get-inventory-chart-data/',
             '/get-deliveries-chart-data/',
+            '/get_production_schedule_data/',
+            '/submit_form/<str:schedule>/',
+            '/delete_schedule_entries/',
+            '/create_schedule/',
+            
         ]
 
     def __call__(self, request):
