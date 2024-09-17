@@ -47,7 +47,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fetch notifications
     function fetchNotifications() {
-        fetch('/get-notifications/')
+        fetch('/get-notifications/', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -94,7 +100,9 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken') // Ensure you include the CSRF token for security
+                'X-CSRFToken': getCookie('csrftoken'), // Ensure you include the CSRF token for security
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({ user_id: userId }) // Use the userId variable defined in the template
         })

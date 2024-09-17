@@ -338,7 +338,9 @@ function startWork(scheduleId) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken")
+            "X-CSRFToken": getCookie("csrftoken"),
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify({ schedule_id: scheduleId })
     })
