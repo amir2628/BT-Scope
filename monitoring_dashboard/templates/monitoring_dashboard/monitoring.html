@@ -156,7 +156,13 @@ function closeModal() {
 }
 
 function fetchScheduleDetails(machineId) {
-    fetch(`/get-schedules-for-machine-for-monitoring/${machineId}/`)
+    fetch(`/get-schedules-for-machine-for-monitoring/${machineId}/`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest' // Indicates AJAX request
+            }
+        })
         .then(response => response.json())
         .then(data => {
             const modal = document.getElementById('cutommodal');
