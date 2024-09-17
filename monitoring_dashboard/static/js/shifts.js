@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function () {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'  // This header indicates that it's an AJAX request
+            'X-Requested-With': 'XMLHttpRequest'
         }
     });
     
