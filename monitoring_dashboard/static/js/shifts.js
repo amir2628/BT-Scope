@@ -200,7 +200,15 @@ document.addEventListener('DOMContentLoaded', function () {
   
     // Function to fetch employee rows
     async function fetchEmployeeRows(firstDay, lastDate) {
-      const response = await fetch('/api/employees/');
+      // const response = await fetch('/api/employees/');
+      const response = await fetch('/api/employees/', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'  // This header indicates that it's an AJAX request
+        }
+    });
+    
       const employees = await response.json();
       const totalDays = lastDate;
       console.log("here are the employees: ", employees)

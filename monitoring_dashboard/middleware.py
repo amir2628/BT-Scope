@@ -72,6 +72,9 @@ class BlockDirectAccessMiddleware:
             '/start-work/',
             '/finish-work/',
             '/end-shift/',
+            '/resume-work/',
+            '/get-schedule-details-Timer-elapsed/<int:schedule_id>/',
+            '/api/employees/',
             
 
             '/instruments/data/',
