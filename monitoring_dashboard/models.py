@@ -74,7 +74,8 @@ class CustomUser(AbstractUser):
     ROLES = (
         ('operator', 'Оператор'),
         ('manager', 'Руководитель'),
-        ('regular_user', 'Обычный пользователь'),
+        ('regular_user', 'ОТК, и т. д.'),
+        ('noAccess_user', 'Простой пользователь, Слесарь и т. д.'),
         ('admin', 'Admin'),
     )
     role = models.CharField(max_length=20, choices=ROLES, default='regular_user')
