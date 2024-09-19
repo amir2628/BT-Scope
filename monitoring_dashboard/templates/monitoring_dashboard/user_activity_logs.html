@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Activity Logs</title>
-    <link rel="stylesheet" href="{% static 'css/planning.css' %}">
+    <link rel="stylesheet" href="{% static 'css/userActivity.css' %}">
     <!-- <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.1/dist/bootstrap-table.min.css" rel="stylesheet"> -->
@@ -22,185 +22,12 @@
     <!-- table filter control resources -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <style>
-        body {
-        font-family: "Rubik Mono One", monospace;
-        margin: 0;
-        padding: 10%;
-        display: flex;
-        height: 100vh;
-        background-color: #131313 !important;
-        color: #ecf0f1 !important;
-        }
-        .container {
-            margin-bottom: 20px;
-            padding: 20px;
-            position: relative;
-    max-height: 100vh;
-    margin-top: 0;
-    color: #ecf0f1;
 
-    font-family: "Rubik Mono One", monospace;
-    border-radius: 20px;
-    background-color: #1a1a1a;
-    box-shadow: 0px -5px 15px -2px rgba(0, 0, 0, 0.768);
-    max-width: 100%;
-    margin: 0 auto;
-    padding-top: 1%;
-
-
-    
-        }
-        table {
-            width: 100%;
-        }
-        /* .table th, .table td {
-            vertical-align: middle;
-        } */
-        /* .table-striped tbody tr:nth-of-type(odd) {
-            background-color: #f2f2f2;
-        } */
-
-        /* General Table Styling */
-table.table {
-    /* background-color: #2b2b2b; */
-    border: none;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 30px;
-    color: #ffffff;
-    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.4);
-    border-spacing: 0 10px;
-    border-collapse: separate;
-    position: relative;
-    max-height:  100%;
-    width: 100%;
-}
-
-table.table th, table.table td {
-    padding: 10px 14px;
-    text-align: left;
-    vertical-align: middle;
-    border-bottom: 1px solid #3c3c3c;
-    color: #ffffff;
-    border: none; /* Remove any borders */
-    background-clip: padding-box; /* Prevent the borders from being visible */
-}
-
-table.table th {
-    background-color: #1a1a1a;
-    font-weight: 700;
-    text-transform: uppercase;
-    border-bottom: 2px solid #4a4a4a;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-table.table tbody tr {
-    transition: all 0.3s ease;
-}
-
-table.table tbody tr:hover {
-    background-color: #444444;
-    transform: scale(1.01);
-}
-
-table.table tbody tr td {
-    font-size: 15px;
-    color: #e0e0e0;
-    border-top: 1px solid #333333;
-    border-bottom: none;
-}
-
-table.table tbody tr:not(:last-child) td {
-    border-bottom: 1px solid #333333;
-}
-
-/* Row Spacing */
-table.table tbody tr {
-    margin-bottom: 10px;
-    background-color: #333333;
-    border-radius: 8px;
-}
-
-/* Filter Toolbar Styling */
-.fixed-table-toolbar {
-    /* background-color: #1a1a1a; */
-    background-color: none;
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 15px;
-    /* box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.4); */
-}
-
-.fixed-table-toolbar .btn-group .btn {
-    background-color: #333333;
-    border-color: #4a4a4a;
-    color: #ffffff;
-    border-radius: 50px;
-    margin-left: 10px;
-    padding: 8px 15px;
-    transition: all 0.3s ease;
-}
-
-.fixed-table-toolbar .btn-group .btn:hover {
-    background-color: #444444;
-    border-color: #5a5a5a;
-    color: #ff5722;
-}
-
-.fixed-table-toolbar .search input {
-    background-color: #333333;
-    border-color: #4a4a4a;
-    color: #ffffff;
-    border-radius: 50px;
-    padding-left: 20px;
-    padding-right: 20px;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: inset 0px 4px 8px rgba(0, 0, 0, 0.66), 0px 4px 8px rgba(0, 0, 0, 0.285);
-}
-
-
-.fixed-table-toolbar .search input:focus {
-    border-color: #ff5722;
-    box-shadow: 0px 0px 10px rgba(255, 87, 34, 0.5);
-}
-
-/* Pagination Styling */
-.pagination {
-    display: flex;
-    justify-content: center;
-    padding: 15px 0;
-}
-
-.pagination .page-item .page-link {
-    background-color: #1a1a1a;
-    border: 1px solid #3c3c3c;
-    color: #ffffff;
-    margin: 0 4px;
-    padding: 10px 16px;
-    border-radius: 50px;
-    transition: all 0.3s ease;
-}
-
-.pagination .page-item.active .page-link {
-    background-color: #ff5722;
-    border-color: #ff5722;
-    color: #ffffff;
-}
-
-.pagination .page-item .page-link:hover {
-    background-color: #ff5722;
-    border-color: #ff5722;
-    color: #ffffff;
-}
-    </style>
 </head>
 <body>
     <div class="cnc-schedule-table">
-        <h2 class="mb-4">User Activity Logs</h2>
-        <table id="activityLogsTable"
+        <h2>User Activity Logs</h2>
+        <table id="activityLogsTable" class="table"
             data-toggle="table"
             data-toolbar="#toolbar"
             data-search="true"
@@ -219,7 +46,7 @@ table.table tbody tr {
             data-filter-control="true"
             data-show-search-clear-button="true"
             data-id-field="id"
-            data-page-list="[10, 25, 50, 100, all]"
+            data-page-list="[5, 10, 25, 50, 100, all]"
             data-show-footer="false"
             data-response-handler="responseHandler">
             <thead class="table-dark">
@@ -246,14 +73,27 @@ table.table tbody tr {
         </table>
     </div>
     <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <!-- Bootstrap Bundle JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <!-- Bootstrap Table JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/bootstrap-table.min.js"></script>
+    <!-- Bootstrap Table Extensions -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/bootstrap-table-locale-all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/extensions/export/bootstrap-table-export.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.29.0/tableExport.min.js"></script>
+    <!-- Add Bootstrap Table extensions -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.22.6/locale/bootstrap-table-ru-RU.min.js" integrity="sha512-zaQQ43bp3CBBQUpdqzE5nuLAseVYHdiSY7aaRopq/PyuCHd4LsV949JnrPCztc+Ny8opz5sQpOCNeHhkt+DmqA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+     
     <script>
     $(document).ready(function() {
         function initTable(data) {
+            // Convert each timestamp to the local time format
+            data.forEach(function(item) {
+                item.timestamp = moment.utc(item.timestamp).local().format('YYYY-MM-DD HH:mm:ss');  // Ypu can change the format here
+            });
+
             $('#activityLogsTable').bootstrapTable('destroy').bootstrapTable({
                 columns: [
                     { field: 'id', title: 'ID', sortable: true },
@@ -274,8 +114,8 @@ table.table tbody tr {
                 data: data,
                 search: true,
                 pagination: true,
-                sidePagination: 'client', // Or 'server' if data is large and fetched from the server
-                pageList: [10, 25, 50, 100, 'All'],
+                sidePagination: 'client', // client Or 'server' if data is large and fetched from the server
+                pageList: [5, 10, 25, 50, 100, 'All'],
                 showFooter: false,
                 detailView: false
             });

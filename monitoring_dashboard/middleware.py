@@ -159,9 +159,19 @@ from monitoring_dashboard.models import UserActivityLog
 
 #         return response
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
 class UserActivityLoggerMiddleware:
     EXCLUDED_PATHS = [
         '/get-machine-status/',
+        '/activity-logs/',
+        '/activity-logs/data/',
     ]
 
     def __init__(self, get_response):
@@ -192,7 +202,8 @@ class UserActivityLoggerMiddleware:
                 path=request.path,
                 method=request.method,
                 timestamp=now(),
-                ip_address=request.META.get('REMOTE_ADDR'),
+                # ip_address=request.META.get('REMOTE_ADDR'),
+                ip_address=get_client_ip(request),  # Use updated function to fetch IP
                 request_data=dict(request_data),  # Convert QueryDict to regular dict
                 response_data=response.content.decode('utf-8')[:500]  # Capture first 500 characters of the response (adjust as needed)
             )

@@ -308,23 +308,7 @@ def update_schedule(request):
                 print("cncMachineId is missing from the data")
                 return JsonResponse({'success': False, 'error': 'cncMachineId is missing'})
             schedule.urgent = data['urgent']
-            schedule.save()
-
-
-            # # Handle file uploads (if any)
-            # files = request.FILES.getlist('files')
-            # if files:
-            #     uploaded_files = []
-            #     for file in files:
-            #         uploaded_file = UploadedFile.objects.create(file=file, schedule=schedule)
-            #         uploaded_file.save()
-            #         uploaded_files.append(uploaded_file)
-
-            #     # Associate new files with the schedule
-            #     schedule.files.set(uploaded_files)
-
-            #     return JsonResponse({'success': True})
-            
+            schedule.save()           
 
             return JsonResponse({'success': True})
         except Schedule.DoesNotExist:
@@ -539,9 +523,7 @@ def reset_password_form(request, uid, token):
     return render(request, 'monitoring_dashboard/reset_password_form.html', {'uid': uid, 'token': token})
 
 
-
-
-# signal_handlers.py
+# signal_handler for email
 
 from django.conf import settings
 from django.urls import reverse
@@ -772,37 +754,6 @@ def add_delivered_product(request):
     return JsonResponse({'success': False})
 
 
-
-# def inventory(request):
-#     if request.user.role == 'operator':
-#         return redirect('unauthorized')
-#     materials = Material.objects.all()
-#     finished_products = FinishedProduct.objects.all()
-#     delivered_products = DeliveredProduct.objects.all()
-#     total_materials_count = materials.count()
-#     total_finished_products = finished_products.count()
-#     total_delivered_products = delivered_products.count()
-#     return render(request, 'monitoring_dashboard/inventory.html', {
-#         'materials': materials,
-#         'finished_products': finished_products,
-#         'delivered_products': delivered_products,
-#         'total_materials' : total_materials_count,
-#         'total_finished_products' : total_finished_products,
-#         'total_delivered_products' : total_delivered_products
-#     })
-
-
-def get_materials_chart_data(request):
-    data = Material.objects.all()
-    full = data.filter(quantity__gte=900).count()
-    mid = data.filter(quantity__gte=500, quantity__lt=900).count()
-    low = data.filter(quantity__lt=500).count()
-    return JsonResponse({
-        'labels': ['Full', 'Mid', 'Low'],
-        'data': [full, mid, low],
-    })
-
-
 # # ========================> The previous view for querying the schedule was not dynamic. So I wrote the next one:
 @login_required(login_url='login')
 def get_production_schedule_data(request):
@@ -976,27 +927,6 @@ def create_schedule(request):
 
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
-def get_inventory_chart_data(request):
-    data = FinishedProduct.objects.all()
-    full = data.filter(quantity__gte=900).count()
-    mid = data.filter(quantity__gte=500, quantity__lt=900).count()
-    low = data.filter(quantity__lt=500).count()
-    return JsonResponse({
-        'labels': ['Full', 'Mid', 'Low'],
-        'data': [full, mid, low],
-    })
-
-def get_deliveries_chart_data(request):
-    data = DeliveredProduct.objects.all()
-    full = data.filter(quantity__gte=900).count()
-    mid = data.filter(quantity__gte=500, quantity__lt=900).count()
-    low = data.filter(quantity__lt=500).count()
-    return JsonResponse({
-        'labels': ['Full', 'Mid', 'Low'],
-        'data': [full, mid, low],
-    })
-
-
 #  =====> Added for the QR code login mechanism
 
 from django.shortcuts import render, redirect
@@ -1046,8 +976,7 @@ def cnc_planning(request):
     user = request.user
     user_schedules = []
 
-    # Assuming you have a way to check if the user is an operator
-    if user.role == 'operator':  # Adjust this condition based on your user model
+    if user.role == 'operator': 
         # Get schedules for the logged-in operator for today
         # user_schedules = Schedule.objects.filter(
         #     operator_name=user.username,
@@ -1922,134 +1851,6 @@ def get_calibration_status(request):
     return JsonResponse(data)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # MT connect and machine data
-# import requests
-# from django.http import HttpResponse
-
-# def fetch_mtconnect_data():
-#     url = "http://localhost:5000/current"  # MTConnect agent URL
-#     try:
-#         response = requests.get(url)
-#         response.raise_for_status()  # Raise an exception for HTTP errors
-#         return response.text  # Return the raw XML content as a string
-#     except requests.RequestException as e:
-#         print(f"Error fetching MTConnect data: {e}")
-#         return None
-
-# def mtconnect_view(request):
-#     xml_data = fetch_mtconnect_data()
-#     if xml_data:
-#         print("MTConnect Data:")
-#         print(xml_data)
-#     else:
-#         print("Failed to fetch MTConnect data.")
-    
-#     return HttpResponse("Check the console for MTConnect data.")
-
-# from django.http import JsonResponse
-# import xml.etree.ElementTree as ET
-# import requests
-
-# def fetch_mtconnect_data():
-#     url = "http://localhost:5000/current"  # MTConnect agent URL
-#     try:
-#         response = requests.get(url)
-#         response.raise_for_status()  # Raise an exception for HTTP errors
-        
-#         # Return the response content (assuming it should be XML)
-#         return response.content  # Return raw content instead of .text to handle bytes properly
-#     except requests.RequestException as e:
-#         print(f"Error fetching MTConnect data: {e}")
-#         return None
-
-# def get_machine_status(request, machine_id):
-#     xml_data = fetch_mtconnect_data()
-#     if xml_data and machine_id == '7':
-#         try:
-#             print("Raw XML Data:")
-#             print(xml_data)  # Print the raw XML data
-
-#             # Parse the XML data
-#             root = ET.fromstring(xml_data)  # root will be an XML Element
-            
-#             # Attempt to find the 'f_sim_p1_ctl_exec' element
-#             f_sim_p1_ctl_exec_element = root.find(".//DataItem[@id='f_sim_p1_ctl_exec']")
-            
-#             if f_sim_p1_ctl_exec_element is not None and f_sim_p1_ctl_exec_element.text is not None:
-#                 f_sim_p1_ctl_exec = f_sim_p1_ctl_exec_element.text
-#                 return JsonResponse({'f_sim_p1_ctl_exec': f_sim_p1_ctl_exec})
-#             else:
-#                 error_message = "DataItem with id 'f_sim_p1_ctl_exec' not found or has no text."
-#                 print(error_message)
-#                 return JsonResponse({'error': error_message}, status=400)
-            
-#         except ET.ParseError as e:
-#             print(f"Error parsing XML data: {e}")
-#             return JsonResponse({'error': 'Failed to parse MTConnect data'}, status=500)
-
-#     else:
-#         return JsonResponse({'error': 'Failed to fetch MTConnect data or machine ID not 7'}, status=400)
-# from django.http import JsonResponse
-# import xml.etree.ElementTree as ET
-# import requests
-
-# def fetch_execution_data():
-#     # url = "http://localhost:5000/current?path=//DataItem[@type=%22EXECUTION%22]"  # Specific MTConnect path
-#     url = "http://localhost:5000/current"
-#     try:
-#         response = requests.get(url)
-#         response.raise_for_status()  # Raise an exception for HTTP errors
-#         return response.content  # Return raw content as bytes for XML parsing
-#     except requests.RequestException as e:
-#         print(f"Error fetching MTConnect data: {e}")
-#         return None
-
-# def get_machine_status(request, machine_id):
-#     if machine_id == '7':
-#         xml_data = fetch_execution_data()  # Fetch data from the specific path
-#         if xml_data:
-#             try:
-#                 # Parse the XML data
-#                 root = ET.fromstring(xml_data)
-#                 print(f'here is the roor xml data: {root}')
-
-#                 # Locate the Execution element using the provided path
-#                 f_sim_p1_ctl_exec_element = root.find(".//Execution[@dataItemId='f_sim_p1_ctl_exec']")
-
-#                 # Check if the element exists and has a text value
-#                 if f_sim_p1_ctl_exec_element is not None and f_sim_p1_ctl_exec_element.text is not None:
-#                     f_sim_p1_ctl_exec = f_sim_p1_ctl_exec_element.text
-#                     return JsonResponse({'f_sim_p1_ctl_exec': f_sim_p1_ctl_exec})
-#                 else:
-#                     error_message = "DataItem with id 'f_sim_p1_ctl_exec' not found or has no text."
-#                     print(error_message)
-#                     return JsonResponse({'error': error_message}, status=400)
-
-#             except ET.ParseError as e:
-#                 print(f"Error parsing XML data: {e}")
-#                 return JsonResponse({'error': 'Failed to parse MTConnect data'}, status=500)
-#         else:
-#             return JsonResponse({'error': 'Failed to fetch MTConnect data'}, status=400)
-#     else:
-#         return JsonResponse({'error': 'Machine ID is not 7'}, status=400)
-
-
 from django.http import JsonResponse
 import requests
 from bs4 import BeautifulSoup
@@ -2064,36 +1865,6 @@ def fetch_execution_data():
         print(f"Error fetching MTConnect data: {e}")
         return None
 
-# def get_machine_status(request, machine_id):
-#     if machine_id == '7':
-#         xml_data = fetch_execution_data()  # Fetch data from the specific path
-#         if xml_data:
-#             try:
-#                 # Parse the XML data using BeautifulSoup
-#                 soup = BeautifulSoup(xml_data, 'xml')
-#                 # print(f'here is the parsed xml data: {soup.prettify()}')
-
-#                 # Locate the Execution element using the dataItemId attribute 
-#                 execution_element = soup.find('Execution', {'dataItemId': 'f_sim_p1_ctl_exec'})
-#                 part_count_element = soup.find('PartCount', {'dataItemId': 'f_sim_p1_part_count_complete'})
-
-#                 # Check if the element exists and has a text value
-#                 if execution_element is not None and execution_element.text:
-#                     f_sim_p1_ctl_exec = execution_element.text.strip()  # Strip any extra whitespace
-#                     return JsonResponse({'f_sim_p1_ctl_exec': f_sim_p1_ctl_exec})
-#                 else:
-#                     error_message = "DataItem with id 'f_sim_p1_ctl_exec' not found or has no text."
-#                     print(error_message)
-#                     return JsonResponse({'error': error_message}, status=400)
-
-
-#             except Exception as e:
-#                 print(f"Error processing XML data: {e}")
-#                 return JsonResponse({'error': 'Failed to process MTConnect data'}, status=500)
-#         else:
-#             return JsonResponse({'error': 'Failed to fetch MTConnect data'}, status=400)
-#     else:
-#         return JsonResponse({'error': 'Machine ID is not 7'}, status=400)
 def get_machine_status(request, machine_id):
     if machine_id == '7':
         xml_data = fetch_execution_data()  # Fetch data from the specific path
@@ -2160,13 +1931,15 @@ def get_machine_status(request, machine_id):
 # This is for capturing user activity logs
 
 from django.shortcuts import render
-
+@login_required(login_url='login')
 def activity_logs_view(request):
+    if request.user.role != 'admin':
+        return redirect('unauthorized')
     return render(request, 'monitoring_dashboard/user_activity_logs.html')
 
 from django.http import JsonResponse
 from .models import UserActivityLog  # Replace with your actual model
-
+@login_required(login_url='login')
 def activity_logs_data(request):
     logs = UserActivityLog.objects.all()
 
