@@ -146,6 +146,10 @@ urlpatterns = [
     # path('mtconnect/', views.mtconnect_view, name='mtconnect_view'),
     path('get-machine-status/<str:machine_id>/', views.get_machine_status, name='get_machine_status'),
 
+    # This is for gathering user activity logs
+    path('activity-logs/', views.activity_logs_view, name='user_activity_logs'),
+    path('activity-logs/data/', views.activity_logs_data, name='activity_logs_data'),
+
 ]
 
 

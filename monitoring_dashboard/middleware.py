@@ -116,3 +116,85 @@ class BlockDirectAccessMiddleware:
 
         # Block all other requests
         return False
+
+
+
+
+
+# this is for capturing user activity logs:
+
+from django.utils.timezone import now
+from monitoring_dashboard.models import UserActivityLog
+
+# class UserActivityLoggerMiddleware:
+#     def __init__(self, get_response):
+#         self.get_response = get_response
+
+#     def __call__(self, request):
+#         # Log the request body and query parameters (POST or GET data)
+#         request_data = request.POST if request.method == 'POST' else request.GET
+
+#         # Call the view and get the response
+#         response = self.get_response(request)
+
+#         if request.user.is_authenticated:
+#             print(f"Logging activity for user: {request.user.username}")
+#             # Log to the database
+#             UserActivityLog.objects.create(
+#                 user=request.user,
+#                 username=request.user.username,
+#                 first_name=request.user.first_name,
+#                 middle_name=request.user.middle_name,
+#                 last_name=request.user.last_name,
+#                 role=request.user.role,
+#                 position=request.user.position,
+#                 email=request.user.email,
+#                 path=request.path,
+#                 method=request.method,
+#                 timestamp=now(),
+#                 ip_address=request.META.get('REMOTE_ADDR'),
+#                 request_data=dict(request_data),  # Convert QueryDict to regular dict
+#                 response_data=response.content.decode('utf-8')[:500]  # Capture first 500 characters of the response (adjust as needed)
+#             )
+
+#         return response
+
+class UserActivityLoggerMiddleware:
+    EXCLUDED_PATHS = [
+        '/get-machine-status/',
+    ]
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Skip logging for excluded paths
+        if any(request.path.startswith(path) for path in self.EXCLUDED_PATHS):
+            return self.get_response(request)
+
+        # Log the request body and query parameters (POST or GET data)
+        request_data = request.POST if request.method == 'POST' else request.GET
+
+        # Call the view and get the response
+        response = self.get_response(request)
+
+        if request.user.is_authenticated:
+            # Log to the database
+            UserActivityLog.objects.create(
+                user=request.user,
+                username=request.user.username,
+                first_name=request.user.first_name,
+                middle_name=request.user.middle_name,
+                last_name=request.user.last_name,
+                role=request.user.role,
+                position=request.user.position,
+                email=request.user.email,
+                path=request.path,
+                method=request.method,
+                timestamp=now(),
+                ip_address=request.META.get('REMOTE_ADDR'),
+                request_data=dict(request_data),  # Convert QueryDict to regular dict
+                response_data=response.content.decode('utf-8')[:500]  # Capture first 500 characters of the response (adjust as needed)
+            )
+
+        return response

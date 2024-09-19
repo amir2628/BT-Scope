@@ -2155,3 +2155,40 @@ def get_machine_status(request, machine_id):
             return JsonResponse({'error': 'Failed to fetch MTConnect data'}, status=400)
     else:
         return JsonResponse({'error': 'Machine ID is not 7'}, status=400)
+
+
+# This is for capturing user activity logs
+
+from django.shortcuts import render
+
+def activity_logs_view(request):
+    return render(request, 'monitoring_dashboard/user_activity_logs.html')
+
+from django.http import JsonResponse
+from .models import UserActivityLog  # Replace with your actual model
+
+def activity_logs_data(request):
+    logs = UserActivityLog.objects.all()
+
+    data = [{
+        'id': log.id,
+        'username': log.username,
+        'firstName': log.first_name,
+        'middleName': log.middle_name,
+        'lastName': log.last_name,
+        'role': log.role,
+        'position': log.position,
+        'email': log.email,
+        'path': log.path,
+        'method': log.method,
+        'requestData': log.request_data,
+        'responseData': log.response_data,
+        'timestamp': log.timestamp,
+        'ip_address': log.ip_address,
+
+    } for log in logs]
+    return JsonResponse(data, safe=False)
+
+
+
+

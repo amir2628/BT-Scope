@@ -564,3 +564,24 @@ class SmoothGauge(models.Model):
 
 
 
+# this is for capturing user activity logs:
+from django.conf import settings  # Import settings to reference AUTH_USER_MODEL
+
+class UserActivityLog(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Reference AUTH_USER_MODEL
+    username = models.CharField(max_length=150)
+    first_name = models.CharField(max_length=30)
+    middle_name = models.CharField(max_length=30, blank=True)
+    last_name = models.CharField(max_length=30)
+    role = models.CharField(max_length=20)
+    position = models.CharField(max_length=30)
+    email = models.EmailField(max_length=254)
+    path = models.CharField(max_length=255)  # URL path accessed
+    method = models.CharField(max_length=10)  # GET, POST, etc.
+    timestamp = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    request_data = models.TextField(blank=True)  # Store the request data as text
+    response_data = models.TextField(blank=True)  # Store the response data as text
+
+    def __str__(self):
+        return f"{self.username} - {self.path} - {self.timestamp}"
