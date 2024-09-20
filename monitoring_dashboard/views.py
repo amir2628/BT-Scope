@@ -1359,10 +1359,11 @@ def get_notifications(request):
 
 
 def employee_list(request):
-    employees = CustomUser.objects.filter(role__in=['operator', 'manager', 'regular_user']).values('id', 'first_name', 'middle_name', 'last_name', 'role')
+    employees = CustomUser.objects.filter(role__in=['operator', 'regular_user', 'noAccess_user']).values('id', 'username', 'first_name', 'middle_name', 'last_name', 'role')
     employee_data = [
         {
             "id": emp['id'],  # Include the id in the response
+            "username": emp['username'],
             "name": f"{emp['first_name']} {emp['middle_name']} {emp['last_name']}",
             'role': f"{emp['role']}"
         }
